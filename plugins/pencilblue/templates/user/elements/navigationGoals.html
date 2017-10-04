@@ -1,0 +1,166 @@
+<nav id="top_menu" class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar_collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/user/manage_account">
+                <img id="menu_logo" src="^site_menu_logo^"></img>
+            </a>
+        </div>
+        <div id="navbar_collapse" class="collapse navbar-collapse">
+            <span ng-repeat="navItem in navigation" ng-cloak>
+                <ul class="nav navbar-nav">
+                    <li class="{{navItem.active}}" ng-if="!navItem.dropdown">
+                        <a href="{{navItem.href}}"><i class="fa fa-{{navItem.icon}}"></i>&nbsp;{{navItem.title}}</a>
+                    </li>
+                    <li class="dropdown {{navItem.active}}" ng-if="navItem.dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-{{navItem.icon}}"></i>&nbsp;{{navItem.title}}&nbsp;<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li class="{{childItem.active}}" ng-repeat="childItem in navItem.children" ng-cloak>
+                                <a href="{{childItem.href}}"><i class="fa fa-{{childItem.icon}}"></i>&nbsp;{{childItem.title}}</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div id="side_menu" class="col-md-3" style="padding-left: 0">
+            <div>
+                <a class="navbar-brand" href="/user/manage_account" style="height:150px">
+                    <img src="/img/123.png" style="max-height: 100px;z-index: 15;float: right;position: absolute;left: 67%;">
+                    <img src="^site_menu_logo^" style="max-height:130px; margin-top: 27px"></img>
+                </a>
+            </div>
+            <div class="spacer"></div>
+            <div class="panel-group" id="nav_accordion" style="margin-top: 20px;">
+                <span ng-repeat="navItem in navigation track by navItem.id">
+                    <div class="panel panel-default" ng-if="!navItem.active" ng-cloak>
+                        <div class="panel-heading">
+                            <a data-toggle="collapse" data-parent="#nav_accordion" href="#{{navItem.id}}_collapse" ng-if="navItem.dropdown">
+                                <div class="panel-title">
+                                    <i class="fa fa-{{navItem.icon}}"></i>&nbsp;{{navItem.title}}
+                                </div>
+                            </a>
+                            <a href="{{navItem.href}}" ng-if="!navItem.dropdown">
+                                <div class="panel-title">
+                                    <i class="fa fa-{{navItem.icon}}"></i>&nbsp;{{navItem.title}}
+                                </div>
+                            </a>
+                        </div>
+                        <div id="{{navItem.id}}_collapse" class="panel-collapse collapse" ng-if="navItem.dropdown">
+                            <ul class="nav nav-pills nav-stacked">
+                                <li class="{{childItem.active}}" ng-repeat="childItem in navItem.children track by childItem.id" ng-cloak>
+                                     <a href="{{childItem.href}}" ng-attr-data-toggle="{{childItem.id == 'set_goal' ? 'modal' : 'notToggle' }}" ng-attr-data-target="{{childItem.id == 'set_goal' ? '#setGoalModal' : '' }}">
+                                        <i class="fa fa-{{childItem.icon}}"></i>&nbsp;{{childItem.title}}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-primary" ng-if="navItem.active" ng-cloak>
+                        <div class="panel-heading"><!--manage account-->
+                            <a data-toggle="collapse" data-parent="#nav_accordion" href="#{{navItem.id}}_collapse" ng-if="navItem.dropdown">
+                                <div class="panel-title">
+                                    <i class="fa fa-{{navItem.icon}}"></i>&nbsp;{{navItem.title}}
+                                </div>
+                            </a>
+                            <a href="{{navItem.href}}" ng-if="!navItem.dropdown">
+                                <div class="panel-title">
+                                    <i class="fa fa-{{navItem.icon}}"></i>&nbsp;{{navItem.title}}
+                                </div>
+                            </a>
+                        </div>
+                        <div id="{{navItem.id}}_collapse" class="panel-collapse collapse in" ng-if="navItem.dropdown">
+                            <ul class="nav nav-pills nav-stacked">
+                                <li class="{{childItem.active}}" ng-repeat="childItem in navItem.children track by childItem.id" ng-cloak>
+                                    <a href="{{childItem.href}}" ng-if = "childItem.id != 'set_goal' || (childItem.id == 'set_goal' && user.admin == 0)" ng-attr-data-toggle="{{childItem.id == 'set_goal' ? 'modal' : 'notToggle' }}" ng-attr-data-target="{{childItem.id == 'set_goal' ? '#setGoalModal' : '' }}">
+                                        <i class="fa fa-{{childItem.icon}}"></i>&nbsp;{{childItem.title}}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!--controller-->
+                </span>
+            </div>
+        </div>
+        
+
+        <div class="modal fade" id="setGoalModal" tabindex="-1" >
+           <div class="modal-dialog">
+              <div class="modal-content">
+                 <div class="modal-header">
+                    <button type="button" class="close" 
+                       data-dismiss="modal" aria-hidden="true">
+                          &times;
+                    </button>
+                    <h4 class="modal-title" id="setGoalModalTitle">
+                       Set a goal to a child
+                    </h4>
+                 </div>
+                 <form name="setGoalForm" ng-submit="addNewGoal()" novalidate>
+                    <div class="modal-body">
+                        <div class="form-group" ng-class="{'has-error': !isFieldValid(setGoalForm.child_username)}">
+                            <label>Select a child</label>
+                            <!-- ng-init="goals.child_username = children[0].child_username " -->
+                            <select name="child_username"  ng-model="goal.child_username" class="form-control" required>
+                                <option 
+                                    ng-selected="{{child.child_username == goals.child_username}}"
+                                    ng-repeat="child in children"
+                                    value="{{child.child_username}}">
+                                    {{child.child_username}}
+                                </option>
+                            </select>
+                            <div class="form_error" ng-if="!isFieldValid(setGoalForm.child_username)">^loc_REQUIRED_FIELD^</div>
+                        </div>
+                        <div class="form-group" ng-class="{'has-error': !isFieldValid(setGoalForm.goalName)}">
+                            <label>Goal name</label>
+                            <input type="text" name="goalName" ng-model="goal.goalName" class="form-control" required></input>
+                            <div class="form_error" ng-if="!isFieldValid(setGoalForm.goalName)">^loc_REQUIRED_FIELD^</div>
+                        </div>
+                        <div class="form-group" ng-class="{'has-error': !isFieldValid(setGoalForm.type)}">
+                            <label>Type</label>
+                            <!-- ng-init="goals.child_username = children[0].child_username " -->
+                            <!-- ng-options="option.value as prize.prize_name for prize in prizes" -->
+                            <select name="type"  ng-model="goal.type" class="form-control" required>
+                                <option 
+                                        ng-selected="{{type.type_name == goal.type}}"
+                                        ng-repeat="type in types"
+                                        value="{{type.type_name}}">
+                                        {{type.type_name}}
+                                </option>
+                            </select>
+                            <div class="form_error" ng-if="!isFieldValid(setGoalForm.type)">^loc_REQUIRED_FIELD^</div>
+                        </div>
+                        <div class="form-group" ng-class="{'has-error': !isFieldValid(setGoalForm.goal)}">
+                            <label>Goal</label>
+                            <input type="text" name="goal" ng-model="goal.goal" class="form-control" required></input>
+                            <div class="form_error" ng-if="!isFieldValid(setGoalForm.goal)">^loc_REQUIRED_FIELD^</div>
+                        </div>
+
+                     </div><!-- end modal-->
+                     <div class="modal-footer">
+                        <button type="button" class="btn btn-default" 
+                           data-dismiss="modal">Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                           Submit
+                        </button>
+                     </div>
+                 </form>
+              </div>
+        </div>
+    </div>
+
+  

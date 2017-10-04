@@ -1,0 +1,198 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript" src="/js/angular/filters/parsable_date.js"></script>
+
+<script type="text/javascript">
+var pencilblueApp = angular.module('pencilblueApp', ['validation','parseDate']) 
+//['validation', 'uploadPhoto'] original dependency
+.controller('PencilBlueController', function($scope, $rootScope, $filter,$timeout,$http, $window, validationService) {
+  ^angular_objects^
+  ^tmp_angular=admin=elements=is_field_valid^
+
+
+  $scope.success_update_show = false;
+  $scope.error_update_show = false;
+  $scope.success_add_show = false;
+  $scope.error_add_show = false;
+  $http.get('/js/data/reminder.json')
+      .then(function(res){
+        
+        $scope.update_SUCCESS_Type = res.data.pencil_blue_golas.update_success.type;
+        $scope.update_SUCCESS_Src = res.data.pencil_blue_golas.update_success.link;
+
+        $scope.update_ERROR_Type = res.data.pencil_blue_golas.update_error.type;
+        $scope.update_ERROR_Src = res.data.pencil_blue_golas.update_error.link;
+
+        $scope.add_SUCCESS_Type = res.data.pencil_blue_golas.add_success.type;
+        $scope.add_SUCCESS_Src = res.data.pencil_blue_golas.add_success.link;
+
+        $scope.add_ERROR_Type = res.data.pencil_blue_golas.add_error.type;
+        $scope.add_ERROR_Src = res.data.pencil_blue_golas.add_error.link;
+  });
+
+  $scope.checkChildren = function(){
+  	if($scope.adminLevel == 0 && $scope.children.length < 1){
+  		alert("You do not have any child. Please add one child at least. \nNow the page will go to your account.");
+  		$window.location.href = '/user/manage_account';
+  	}
+  }
+  $scope.checkChildren();
+
+  // $scope.prizes = [{prize_name : 'cao'},{prize_name : 'ri'},{prize_name : 'made'}];
+  $scope.finalGoal = {};
+  $scope.setUserIdOfGoal = function(child_username){
+  	for(var child of $scope.children){
+  		if(child.child_username == child_username){
+  			$scope.finalGoal.user_id = child.child_id;
+  			break;
+  		}
+  	}
+  }
+  $scope.setFinalGoal = function(){
+  	$scope.finalGoal.goalName = $scope.goal.goalName;
+  	$scope.finalGoal.child_username = $scope.goal.child_username;
+  	$scope.finalGoal.goal = $scope.goal.goal;
+  	$scope.finalGoal.type = $scope.goal.type;
+
+  }
+  $scope.addNewGoal = function(){
+    $scope.formSubmitted = true;
+    if(!validationService.isFormValid($scope.setGoalForm)) {
+       return;
+    }
+    if($scope.goal.goal < 1 || $scope.goal.goal > 100000){
+    	alert("The goal is out of the boundry. The goal should be from 1 to 100000");
+    	return;
+    }
+    if (isNaN($scope.goal.goal)) {
+      alert("Please input valid number for the goal");
+      return;
+    };
+    $scope.setUserIdOfGoal($scope.goal.child_username);
+    $scope.setFinalGoal();
+
+    var postURL = '/actions/user/manage_goals/add_new_goal_controller';
+    var postData = $scope.finalGoal;
+    $http.post(postURL, postData)
+    .success(function(result) {
+      $("#setGoalModal").modal("hide");
+      // $scope.play_add_success();
+      $scope.formSubmitted = false;
+    })
+    .error(function(error, result) {
+      $scope.play_add_error();
+      return;
+    });
+  }
+
+
+ $scope.saveGoal = function(goalInfor) {
+ 
+  $scope.formSubmitted = true;
+  $scope.successMessage = null;
+  $scope.errorMessage = null;
+  if (isNaN(goalInfor.goal)) {
+    alert("Please input valid number for the goal");
+    return;
+  };
+
+  var postURL = '/actions/user/updateGoal';
+  $http.post(postURL, goalInfor)
+  .success(function(result) {
+    $scope.successMessage = result.message;
+    $scope.play_update_success();
+    $scope.formSubmitted = false;
+    $scope.saving = false;
+  })
+  .error(function(error, status) {
+    $scope.errorMessage = error.message;
+    $scope.play_update_error();
+    $scope.formSubmitted = false;
+    $scope.saving = false;
+  });
+};
+
+$scope.deleteGoal = function(goalInfor) {
+ 
+  var deletegoal = $window.confirm('Are you absolutely sure you want to disable this goal?');
+  if (deletegoal){
+    $scope.formSubmitted = true;
+    $scope.successMessage = null;
+    $scope.errorMessage = null;
+
+    var postURL = '/actions/user/deleteGoal';
+    $http.post(postURL, goalInfor)
+    .success(function(result) {
+      $scope.successMessage = result.message;
+      $scope.play_update_success();
+      $scope.formSubmitted = false;
+      $scope.saving = false;
+    })
+    .error(function(error, status) {
+      $scope.errorMessage = error.message;
+      $scope.play_update_error();
+      $scope.formSubmitted = false;
+      $scope.saving = false;
+    });
+  }
+};
+
+$scope.play_add_success = function() {
+      var audio = document.getElementById("audio_add_success");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+           $scope.success_add_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.success_add_show = false;
+        $window.location.reload();
+      };
+  };
+   $scope.play_add_error = function() {
+      var audio = document.getElementById("audio_add_error");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+           $scope.error_add_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.error_add_show = false;
+        $window.location.reload();
+      };
+  };
+  $scope.play_update_success = function() {
+      var audio = document.getElementById("audio_update_success");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+         $scope.success_update_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.success_update_show = false;
+        $window.location.reload();
+      };
+  };
+
+  $scope.play_update_error = function() {
+      var audio = document.getElementById("audio_update_error");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+          $scope.error_update_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        //$scope.disableVideo = {'display': 'none'};
+        $scope.error_update_show = false;
+        $window.location.reload();
+        //$scope.show_element = false;
+      };
+  };
+ 
+
+
+});
+</script>

@@ -1,0 +1,236 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript" src="/js/angular/filters/parsable_date.js"></script>
+<script type="text/javascript" src="/js/waiting/waitingbar.js"></script>
+<!-- <script type="text/javascript" src="/bower_components/angular-audio/app/angular.audio.js"></script> -->
+<script type="text/javascript">
+var pencilblueApp = angular.module('pencilblueApp', ['ngAudio','validation','parseDate','uploadPhoto']) 
+//['validation', 'uploadPhoto'] original dependency
+.controller('PencilBlueController', function(ngAudio,$scope, $rootScope, $filter,$timeout,$http, $window, validationService) {
+  ^angular_objects^
+  ^tmp_angular=admin=elements=is_field_valid^
+  console.log($scope);
+  $scope.success_update_show = false;
+  $scope.error_update_show = false;
+  $scope.success_add_show = false;
+  $scope.error_add_show = false;
+  $http.get('/js/data/reminder.json')
+      .then(function(res){
+        
+        $scope.update_SUCCESS_Type = res.data.pencil_blue_daily.update_success.type;
+        $scope.update_SUCCESS_Src = res.data.pencil_blue_daily.update_success.link;
+
+        $scope.update_ERROR_Type = res.data.pencil_blue_daily.update_error.type;
+        $scope.update_ERROR_Src = res.data.pencil_blue_daily.update_error.link;
+
+        $scope.add_SUCCESS_Type = res.data.pencil_blue_daily.add_success.type;
+        $scope.add_SUCCESS_Src = res.data.pencil_blue_daily.add_success.link;
+
+        $scope.add_ERROR_Type = res.data.pencil_blue_daily.add_error.type;
+        $scope.add_ERROR_Src = res.data.pencil_blue_daily.add_error.link;
+  });
+
+  $scope.getDate = function(flag) {
+    var td = new Date();
+    td.setDate(td.getDate() + flag);
+    var month = '' + (td.getMonth() + 1);
+    var day = '' + td.getDate();
+    var year = td.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  }
+  
+  $scope.dt = $scope.getDate(0);
+
+   $scope.disabled = function(date, mode) {
+    return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
+  };
+
+   $scope.setStartDateToNow = function() {
+        $scope.activityStart_date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm');
+    };
+  $scope.setEndDateToNow = function() {
+      $scope.activityEnd_date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm');
+  };
+
+  $scope.setEventDate = function(flag){
+    $scope.dt = $scope.getDate(flag);
+    $http.get('/actions/user/manage_daily/changeEventDate?user_id=' + $scope.user._id + '&date=' + $scope.dt)
+    .success(function(result) {
+       $scope.events = result;
+       
+    })
+    .error(function(error, status) {
+      alert("Set event date error");
+      return;
+    });
+  };
+  var newActivity = {};
+  $scope.setNewActivity = function(){
+    newActivity.activityName = $scope.activityName;
+    newActivity.activityMETS = $scope.getMET($scope.activityName);
+    newActivity.activityAddress = $scope.activityAddress;
+    newActivity.activityDescription = $scope.activityDescription;
+    newActivity.activityStart_date = $scope.activityStart_date;
+    newActivity.activityEnd_date = $scope.activityEnd_date;
+    newActivity.user_id = $scope.user._id;
+  }
+
+  $scope.addNewActivity = function(){
+    $scope.formSubmitted = true;
+    // console.log($scope);
+    if(!validationService.isFormValid($scope.newActivityForm)) {
+       return;
+    }
+
+    var postURL = '/actions/user/manage_daily/add_new_activity_controller';
+    $scope.setNewActivity();
+    var postData = newActivity;
+    //alert(postData.activityMETS);
+    $http.post(postURL, postData)
+    .success(function(result) {
+      $scope.formSubmitted = false;
+      $("#newActivityModal").modal("hide");
+      $window.location.reload(); 
+       // $scope.play_add_success();
+    })
+    .error(function(error, result) {
+      alert("Add new activity failure");
+      return;
+    });
+  }
+  $scope.getMET = function(event_name){
+      //alert($scope.METList);
+      for(var i = 0; i < $scope.METList.length; i++){
+        if($scope.METList[i].eventName == event_name){
+          return $scope.METList[i].METS;
+        }
+      }
+      var start = new Date($scope.activityStart_date);
+      var end = new Date($scope.activityEnd_date);
+      //alert();
+      var scheduleTime = (end - start) / 60000;
+      //alert(scheduleTime);
+      if(scheduleTime > 30){
+        event_name = event_name+" - hard effort";
+      }else if(scheduleTime > 15){
+        event_name = event_name+" - moderate effort";
+      }else{
+        event_name = event_name+" - light effort";
+      }
+      //alert(event_name);
+      for(var i = 0; i < $scope.METList.length; i++){
+        if($scope.METList[i].eventName == event_name){
+          return $scope.METList[i].METS;
+        }
+      }
+      
+  }
+
+  $scope.saveEvent = function(eventInfor) {
+    console.log('save event');
+    $scope.formSubmitted = true;
+    $scope.successMessage = null;
+    $scope.errorMessage = null;
+    var postURL = '/actions/user/updateEvent';
+    $http.post(postURL, eventInfor)
+    .success(function(result) {
+        $scope.successMessage = result.message;
+        $scope.formSubmitted = false;
+        $scope.saving = false;
+        var postData = {};
+        postData.register_children = eventInfor.user_id;
+        postData.start_date = eventInfor.start_date.split(" ")[0];
+        postData.end_date = eventInfor.end_date.split(" ")[0];
+        postData.calculateIpal = true;
+        console.log(postData);
+        postURL = '/actions/user/ipal_calculation';
+        postData.eventInfor = eventInfor;
+        $http.post(postURL, postData)
+        .success(function(result) {
+          //$scope.successMessage = result.message;
+          $scope.formSubmitted = false;
+          $scope.saving = false;
+          //$scope.play_update_success();
+        })
+        .error(function(error, status) {
+          $scope.errorMessage = error.message;
+          $scope.formSubmitted = false;
+          $scope.saving = false;
+          //$scope.play_update_error();
+        });
+        //$scope.play_update_success();
+      })
+    .error(function(error, status) {
+      
+      $scope.errorMessage = error.message;
+      $scope.formSubmitted = false;
+      $scope.saving = false;
+      //$scope.play_update_error();
+    });
+  }
+  
+  $('#activityStart_date').datetimepicker({format: 'Y-m-d H:i'});
+  $('#activityEnd_date').datetimepicker({format: 'Y-m-d H:i'});
+   //Play Standart
+ $scope.play_add_success = function() {
+      var audio = document.getElementById("audio_add_success");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+           $scope.success_add_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.success_add_show = false;
+        $window.location.reload();
+      };
+  };
+   $scope.play_add_error = function() {
+      var audio = document.getElementById("audio_add_error");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+           $scope.error_add_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.error_add_show = false;
+        $window.location.reload();
+      };
+  };
+  $scope.play_update_success = function() {
+      var audio = document.getElementById("audio_update_success");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+         $scope.success_update_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.success_update_show = false;
+        //$window.location.reload();
+      };
+  };
+
+  $scope.play_update_error = function() {
+      var audio = document.getElementById("audio_update_error");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+          $scope.error_update_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        //$scope.disableVideo = {'display': 'none'};
+        $scope.error_update_show = false;
+       // $window.location.reload();
+        //$scope.show_element = false;
+      };
+  };
+
+});
+
+</script>

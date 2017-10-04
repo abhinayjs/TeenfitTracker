@@ -1,0 +1,33 @@
+^error_success^
+<div class="alert error_success" ng-class="{'alert-success': successMessage, 'alert-danger': errorMessage}" ng-if="errorMessage || successMessage">
+	<span ng-bind="errorMessage || successMessage"></span>
+	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+</div>
+<div class="alert error_success"  ng-if="successMessage"  style="display:none">
+</div>
+<div class="alert error_success"  ng-if="errorMessage"  style="display:none">
+</div>
+	<audio id="audio_update_success"  style="display:none" ng-if="update_SUCCESS_Type=='audio'" name="audio">
+      <source src="{{update_SUCCESS_Src}}"></source>
+  </audio>
+  <!-- <video class='videoPlayer' id="audio_update_success" ng-show="success_update_show"  ng-if="update_SUCCESS_Type=='video'" name="video">
+    <source src="{{update_SUCCESS_Src}}"></source>
+  </video> -->
+  <audio id="audio_update_error"  style="display:none" ng-if="update_ERROR_Type=='audio'" name="audio">
+    <source src="{{update_ERROR_Src}}"></source>
+  </audio>
+  <!-- <video class='videoPlayer' id="audio_update_error" ng-show="error_update_show"  ng-if="update_ERROR_Type=='video'" name="video">
+    <source src="{{update_ERROR_Src}}"></source>
+  </video> -->
+  <audio id="audio_add_success"  style="display:none" ng-if="add_SUCCESS_Type=='audio'" name="audio">
+    <source src="{{add_SUCCESS_Src}}"></source>
+  </audio>
+  <!-- <video class='videoPlayer' id="audio_add_success" ng-show="success_add_show"  ng-if="add_SUCCESS_Type=='video'" name="video">
+    <source src="{{add_SUCCESS_Src}}"></source>
+  </video> -->
+  <audio id="audio_add_error"  style="display:none" ng-if="add_ERROR_Type=='audio'" name="audio">
+    <source src="{{add_ERROR_Src}}"></source>
+  </audio>
+  <!-- <video class='videoPlayer' id="audio_add_error" ng-show="error_add_show"  ng-if="add_ERROR_Type=='video'" name="video">
+    <source src="{{add_ERROR_Src}}"></source>
+  </video> -->

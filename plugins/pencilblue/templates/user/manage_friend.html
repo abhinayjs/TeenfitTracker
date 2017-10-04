@@ -1,0 +1,63 @@
+^tmp_user=headFriend^
+  <div class="col-md-9" style="padding: 0">
+    ^tmp_user=elements=topMenu^
+
+    ^tmp_admin=elements=error_success^
+    ^tmp_admin=elements=sub_nav^
+    ^tmp_admin=elements=tab_nav^
+    <div class="tab-content">
+      <div class="tab-pane active" id="friend_management">
+            <table class="table table-striped table-bordered table-hover" >
+              <thead>
+                  <tr>
+                      <th>Receiver Screen Name</th>
+                      <th>Receiver Email</th>
+                      <th>Score</th>
+                      <th>Acception</th>
+                  </tr>
+              </thead>
+              <tbody ng-repeat="accept in accpetedFriend">
+                  <tr class="odd gradeX">
+                      <td>{{accept.username}} </td>
+                      <td>{{accept.email}}</td>
+                      <td>{{accept.score}}</td>
+                      <td class="center" >Accepted</td>
+                  </tr>
+              </tbody>
+
+            </table>
+      </div>
+
+      <div class="tab-pane" id="friend_invitation">
+            <table class="table table-striped table-bordered table-hover" >
+              <thead>
+                  <tr>
+                      <th>Receiver Screen Name</th>
+                      <th>Receiver Email</th>
+                      <th>Score</th>
+                      <th>Acception</th>
+                      <th>Action</th>
+                  </tr>
+              </thead>
+              <tbody ng-repeat="unaccept in unaccpetedFriend">
+                  <tr class="odd gradeX">
+                      <td>{{unaccept.username}} </td>
+                      <td>{{unaccept.email}}</td>
+                      <td>{{unaccept.score}}</td>
+                      <td class="center" ng-if="unaccept.accept == -1 ">Declined</td>
+                      <td class="center" ng-if="unaccept.accept == 0 ">Unknown</td>
+                       <td>
+                        <button type="submit" class="btn btn-primary btn-sm"  ng-click="deleteFriend(unaccept._id)"><i class="fa fa-refresh"></i>&nbsp;Delete</button>
+                      </td>
+                  </tr>
+              </tbody>
+
+            </table>
+      </div>
+
+    </div>
+    <!-- end tab content -->
+  </div>
+  ^tmp_angular=admin=elements=upload_and_link_photo^
+  ^tmp_angular=user=manage_friend^
+^tmp_admin=footer^

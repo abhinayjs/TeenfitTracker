@@ -1,0 +1,137 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script src="/js/lib/crafty/fruitassassin/assassin.js" type="text/javascript"></script>
+<!-- <script type="text/javascript" src="/js/lib/ngDialog/ngDialog.js"></script>
+<script type="text/javascript" src="/css/lib/ngDialog/ngDialog.min.css"></script> -->
+<script type="text/javascript">
+angular.module('pencilblueApp', ['validation'])
+.controller('PencilBlueController', function($scope, $rootScope, $http, $window, validationService, $sce) {
+    ^angular_objects^
+
+    if($scope.parentUser.admin == 0){
+        var all_children = {};
+        all_children.username = "All Children";
+        all_children._id = "All Children";
+        $scope.children.unshift(all_children);
+    }
+    $scope.showGames = function() {
+        $scope.gameNum = Math.floor(Math.random() * (4 - 1 + 1)) + 1;
+        $scope.showGame = true;
+    };
+
+    $scope.play = function(game){
+        // $scope.gameUrl = $sce.trustAsResourceUrl(url);
+        // $scope.showFrame = true;
+        switch (game) {
+            case 'Fruit_Assassin' :
+                playFruitAssassin($scope.reportScore);
+                break;
+            case 'Defend_The_Den' :
+                //playDefendTheDen($scope.reportScore);
+                break;
+            case 'Cron' :
+                //playCron($scope.reportScore);
+                break;
+            case 'Senet' :
+                //playSenet($scope.reportScore);
+                break;
+        }
+        
+    }
+
+    $scope.reportScore = function(gameName, score){
+        var postURL = '/actions/user/games/manageGames'
+        var postData = {};
+        postData.userId = $scope.user._id;
+        postData.saveScores = true;
+        postData.gameName = gameName;
+        postData.score = score;
+
+        $http.post(postURL, postData)
+        .success(function(result) {
+            console.log(result);
+            $scope.playLaterSuccess = true; 
+        })
+        .error(function(error, status) {
+          alert("Cannot Save Game Scores");
+          return;
+        });
+    }
+
+    $scope.playGameLater = function() {
+        $scope.successMessage = null;
+        $scope.playLaterSuccess = false;
+        var postURL = '/actions/user/games/manageGames'
+        var postData = {};
+        postData.userId = $scope.user._id;
+
+        $http.post(postURL, postData)
+        .success(function(result) {
+            console.log(result);
+            $scope.playLaterSuccess = true;
+            $scope.successMessage = result.message; 
+        })
+        .error(function(error, status) {
+          alert("Game error");
+          return;
+        });
+    };
+    $scope.getDate = function(date,bias) {
+        var currDate = new Date(date);
+        currDate.setDate(currDate.getDate() + bias);
+        var td = currDate,
+          month = '' + (td.getMonth() + 1),
+          day = '' + td.getDate(),
+          year = td.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    };
+
+    $scope.score_date = $scope.getDate(new Date(),-1);
+
+    $scope.setScoreDateAndChildUsername = function(){
+        // console.log($scope.report_date);
+        if($scope.user.admin == 0){
+            if($scope.children.username == null){
+                alert("Please select at least one child.");
+                return;
+            }
+        }
+
+        var postURL = '/actions/user/activity_tracking/changeScoreDate';
+        var postData = {};
+        postData.score_date = $scope.score_date;
+        if($scope.parentUser.admin == 0){
+            postData.child_id = $scope.children.username;
+        }
+        
+        // alert(postData.child_username);
+        console.log(postData);
+        $http.post(postURL, postData)
+        .success(function(result) {
+            console.log(result);
+            $scope.daily_scores = result; 
+            console.log($scope);
+        })
+        .error(function(error, status) {
+          alert("Set score date or child name error");
+          return;
+        });
+
+        // $http.get('/actions/user/activity_tracking/changeScoreDate?score_date=' + $scope.score_date)
+        // .success(function(result) {
+        //     console.log(result);
+        //     $scope.daily_scores = result;
+           
+           
+        // })
+        // .error(function(error, status) {
+        //   alert("Set score date error");
+        //   return;
+        // });
+    };
+});
+
+</script>

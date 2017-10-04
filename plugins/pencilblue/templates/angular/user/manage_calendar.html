@@ -1,0 +1,712 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript" src="/js/angular/filters/parsable_date.js"></script>
+<script type="text/javascript" charset="utf-8">
+	var app = angular.module('pencilblueApp', ['ui.calendar','validation','parseDate'])
+	.controller('PencilBlueController', function($scope, $rootScope, $filter,$timeout,$http, $window, validationService) {
+	    /* config object */
+	    ^angular_objects^
+	    ^tmp_angular=admin=elements=is_field_valid^
+	    console.log($scope);
+
+		$scope.showEvents = [];
+		$scope.setEvents = function(){
+			var i = 0;
+			for(var eachEvent of $scope.events){//cool
+				$scope.showEvents[i] = {};
+				var eventContent = (eachEvent.event_address == null ? "" : eachEvent.event_address)+ "," + (eachEvent.event_description == null ? "" : eachEvent.event_description);
+				$scope.showEvents[i].event_id = eachEvent._id;
+				$scope.showEvents[i].user_id = eachEvent.user_id;
+				$scope.showEvents[i].title = eachEvent.event_name;
+				$scope.showEvents[i].eventContent = eventContent;
+				$scope.showEvents[i].start = new Date(eachEvent.start_date.replace(/-/g, "/"));
+				$scope.showEvents[i].end = new Date(eachEvent.end_date.replace(/-/g, "/"));
+				$scope.showEvents[i].endDate = new Date(eachEvent.end_date.replace(/-/g, "/"));
+				$scope.showEvents[i].finished = eachEvent.finished;
+				$scope.showEvents[i].repeat_id = eachEvent.repeat_id;
+				//fdfsfsfsfsf
+				i++;
+			}
+		}
+		
+		$scope.setEvents();
+		$scope.showChildrenEvents = [];
+		$scope.eventColor = [];
+		$scope.setChildrenEvents = function(){
+			if($scope.childrenEvents != "No children"){
+				var i = 0;
+				$scope.setEventColor();
+				for(var eachEvent of $scope.childrenEvents){
+					$scope.showChildrenEvents[i] = {};
+					var eventContent = (eachEvent.event_address == null ? "" : eachEvent.event_address)+ "," + (eachEvent.event_description == null ? "" : eachEvent.event_description);
+					$scope.showChildrenEvents[i].event_id = eachEvent._id;
+					$scope.showChildrenEvents[i].user_id = eachEvent.user_id;
+					$scope.showChildrenEvents[i].title = eachEvent.event_name;
+					$scope.showChildrenEvents[i].eventContent = eventContent;
+					$scope.showChildrenEvents[i].start = new Date(eachEvent.start_date.replace(/-/g, "/"));
+					$scope.showChildrenEvents[i].end = new Date(eachEvent.end_date.replace(/-/g, "/"));
+					$scope.showChildrenEvents[i].endDate = new Date(eachEvent.end_date.replace(/-/g, "/"));
+					$scope.showChildrenEvents[i].finished = eachEvent.finished;
+					$scope.showChildrenEvents[i].repeat_id = eachEvent.repeat_id;
+					//$scope.showChildrenEvents[i].color = '#B2B2B2';
+					$scope.showChildrenEvents[i].color = $scope.eventColor[eachEvent.user_id];
+					//console.log($scope.eventColor[eachEvent.user_id]);
+					i++;
+				}
+			}
+			
+		}
+		$scope.setEventColor = function(){
+			
+			if($scope.childrenEvents != "No children"){
+				var i = 0;
+				for(var eachEvent of $scope.childrenEvents){
+					if($scope.eventColor[eachEvent.user_id] == null){
+						$scope.eventColor[eachEvent.user_id] = $scope.generateColor();
+					}
+					// $scope.showChildrenEvents[i] = {};
+					// var eventContent = (eachEvent.event_address == null ? "" : eachEvent.event_address)+ "," + (eachEvent.event_description == null ? "" : eachEvent.event_description);
+					// $scope.showChildrenEvents[i].event_id = eachEvent._id;
+					// $scope.showChildrenEvents[i].user_id = eachEvent.user_id;
+					// $scope.showChildrenEvents[i].title = eachEvent.event_name;
+					// $scope.showChildrenEvents[i].eventContent = eventContent;
+					// $scope.showChildrenEvents[i].start = new Date(eachEvent.start_date);
+					// $scope.showChildrenEvents[i].end = new Date(eachEvent.end_date);
+					// $scope.showChildrenEvents[i].endDate = new Date(eachEvent.end_date);
+					// $scope.showChildrenEvents[i].finished = eachEvent.finished;
+					// $scope.showChildrenEvents[i].repeat_id = eachEvent.repeat_id;
+					// $scope.showChildrenEvents[i].color = '#B2B2B2';
+					// i++;
+				}
+			}
+		}
+		$scope.generateColor = function(){
+			r = Math.floor(Math.random() * 200);
+	        g = Math.floor(Math.random() * 200);
+	        b = Math.floor(Math.random() * 200);
+	        c = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+	        return c;
+		}
+		// $scope.rgbToHex = function (r, g, b) {
+		//     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+		// }
+		$scope.getChildUsername = function(user_id){
+			var username = "";
+			for(var child of $scope.children){
+				if(child.child_id == user_id)
+					username = child.child_username;
+			}
+			return username;
+		}
+		$scope.setChildrenEvents();
+		$scope.eventClickUserId = "";
+		$scope.eventFinished = "";
+		$scope.eventId = "";
+		$scope.eventStartDate = "";
+		$scope.eventEndDate = "";
+		$scope.event_repeat_id = "";
+		$scope.eventClick = function(event){
+			var content = event.eventContent.split(",");
+			var event_address = content[0];
+			var event_description = content[1];
+			$("#updateEventModal").modal("show");
+			
+			$scope.eventUsername = $scope.getChildUsername(event.user_id);
+			$scope.eventName = event.title;
+			$scope.eventAddress = event_address;
+			$scope.eventDescription = event_description;
+			$scope.eventStart_time = $scope.showEventStartTime(event.start);
+			$scope.eventEnd_time = $scope.showEventEndTime(event.endDate);
+
+			$scope.eventClickUserId = event.user_id;
+			$scope.eventFinished = event.finished;
+			$scope.eventId = event.event_id;
+			$scope.eventStartDate = event.start;
+			$scope.eventEndDate = event.endDate;
+			if(event.repeat_id != null){
+				$scope.event_repeat_id = event.repeat_id;
+			}else{
+				$scope.event_repeat_id = "";
+			}
+	    }
+	    $scope.showEventStartTime = function(datetime){
+	    	var date = $scope.getDate(datetime._d,0);
+	    	var hours = datetime._d.getHours();
+	    	var minutes = datetime._d.getMinutes();
+	    	if (hours < 10) 
+	    		hours = '0' + hours;
+	    	if (minutes < 10) 
+	    		minutes = '0' + minutes;
+	    	return hours + ':' + minutes;
+	    }
+
+	    $scope.showEventEndTime = function(datetime){
+	    	var date = $scope.getDate(datetime,0);
+	    	var hours = datetime.getHours();
+	    	var minutes = datetime.getMinutes();
+	    	if (hours < 10) 
+	    		hours = '0' + hours;
+	    	if (minutes < 10) 
+	    		minutes = '0' + minutes;
+	    	return hours + ':' + minutes;
+	    }
+
+	    $scope.setEventStartTime = function(date,time){
+	    	var date = $scope.getDate(date._d,0);
+	    	return date + ' ' + time;
+	    }
+
+	    $scope.setEventEndTime = function(date,time){
+	    	var date = $scope.getDate(date,0);
+	    	return date + ' ' + time;
+	    }
+
+	    var updatedEvent = {};
+	    $scope.updateRepeated = false;
+		$scope.setUpdatedEvent = function(){
+			updatedEvent._id = $scope.eventId;
+			updatedEvent.event_name = $scope.eventName;
+			updatedEvent.event_address = $scope.eventAddress;
+			updatedEvent.event_description = $scope.eventDescription;
+			updatedEvent.start_date = $scope.setEventStartTime($scope.eventStartDate,$scope.eventStart_time);
+			updatedEvent.end_date = $scope.setEventEndTime($scope.eventEndDate,$scope.eventEnd_time);
+			updatedEvent.user_id = $scope.eventClickUserId;
+			updatedEvent.finished = $scope.eventFinished;
+			updatedEvent.scheduledMETS = $scope.getUpdateMET($scope.eventName, updatedEvent.start_date, updatedEvent.end_date);
+		}
+		
+		$scope.updateRepeat =  function(){
+			$scope.updateRepeated = true;
+		}
+
+
+	    $scope.updateEvent = function(eventInfor) {
+		    $scope.formSubmitted = true;
+		    $scope.successMessage = null;
+		    $scope.errorMessage = null;
+		  	if(!validationService.isFormValid($scope.updateEventForm)) {
+		     	return;
+		  	}
+		    var postURL = '/actions/user/manage_calendar/update_event';
+		    
+		    
+		    $scope.setUpdatedEvent();
+		  	if($scope.beyondTime(updatedEvent.start_date,updatedEvent.end_date)){
+		  		alert("The end date and time should be larger than the start date and time.")
+		  		return;
+		  	}
+		  	var postData = updatedEvent;
+		  	postData.isRepeated = $scope.updateRepeated
+			postData.repeat_id = $scope.event_repeat_id;
+
+
+		  	$http.post(postURL, postData)
+		    	.success(function(result) {
+		      		$scope.formSubmitted = false;
+		      		alert(result.message);
+		      		window.location.reload(); 
+		    	})
+		    	.error(function(error, result) {
+		     		alert("Update the activity failure");
+	      			return;
+		    	});
+		  }
+		 $scope.deleteEvent = function() {
+	    	//alert($scope.updateRepeated);
+		    $scope.formSubmitted = true;
+		    $scope.successMessage = null;
+		    $scope.errorMessage = null;
+		  	if(!validationService.isFormValid($scope.updateEventForm)) {
+		     	return;
+		  	}
+		    var postURL = '/actions/user/manage_calendar/delete_event';
+		    
+		    
+		    $scope.setUpdatedEvent();
+		  	
+		  	var postData = updatedEvent;
+		  	postData.isRepeated = $scope.updateRepeated
+			postData.repeat_id = $scope.event_repeat_id;
+
+
+		  	$http.post(postURL, postData)
+		    	.success(function(result) {
+		      		$scope.formSubmitted = false;
+		      		alert(result.message);
+		      		window.location.reload(); 
+		    	})
+		    	.error(function(error, result) {
+		     		alert("Delete the activity failure");
+	      			return;
+		    	});
+		  }
+
+	    //dayClick
+	    $scope.eventDate = null;
+	    $scope.dayClick = function(date){
+	    	// if()
+	    	if($scope.adminLevel == 0 && $scope.children == "No children"){
+	    		alert("Firstly, you need to add one child at least if you want to create activities for children");
+	    	}else{
+	    		$("#createEventModal").modal("show");
+	    		$scope.eventDate = date;
+	    	}
+	    	
+	    }
+
+	    $scope.setStartTimeToNow = function(flag) {
+	    	if(flag == 0){
+	    		$scope.activityStart_time = $filter('date')(new Date(), 'HH:mm');
+	    	}else{
+	    		$scope.eventStart_time = $filter('date')(new Date(), 'HH:mm');
+	    	}
+        	
+	    };
+	    $scope.setEndTimeToNow = function(flag) {
+	    	if(flag == 0){
+	    		$scope.activityEnd_time = $filter('date')(new Date(), 'HH:mm');
+	    	}else{
+	    		$scope.eventEnd_time = $filter('date')(new Date(), 'HH:mm');
+	    	}
+	    	// $scope.activityEnd_time = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm');
+	    };
+	    $scope.getDate = function(eventDate,flag) {
+	    	//alert(eventDate);
+			var td = new Date(eventDate);
+			// console.log(eventDate);
+			td.setDate(td.getDate() + flag);
+			var month = '' + (td.getMonth() + 1);
+			var day = '' + td.getDate();
+			var year = td.getFullYear();
+			// console.log(day);
+
+			if (month.length < 2) month = '0' + month;
+			if (day.length < 2) day = '0' + day;
+
+			return [year, month, day].join('-');
+		}
+		$scope.setStartTime = function(){
+			var startDate = $scope.getDate($scope.eventDate._d,1);
+			// alert()
+			var hours = $scope.activityStart_time.toString().substr(0,2);
+			var minutes = $scope.activityStart_time.toString().substr(3,2)
+			return startDate + ' ' + hours + ':' + minutes;
+		}
+
+		$scope.setEndTime = function(){
+			// var endDateTime = $scope.activityEnd_time;
+			// return endDateTime;
+			var endDate = $scope.getDate($scope.eventDate._d,1);
+			// alert(endDate);
+			var hours = $scope.activityEnd_time.toString().substr(0,2);
+			var minutes = $scope.activityEnd_time.toString().substr(3,2)
+			return endDate + ' ' + hours + ':' + minutes;
+		}
+
+		$scope.childCheckBox = false;
+		$scope.childUser = {childUsername: ""};
+		$scope.isSelected = function(){
+			if(document.getElementById('childCheckBox').checked){
+				$scope.childCheckBox = true;
+			}else{
+				$scope.childCheckBox = false;
+				$scope.childUser.childUsername = "";
+			}
+		}
+		
+
+		$scope.getChildId = function(){
+			var id = null;
+			for(var child of $scope.children){
+				//console.log(child.child_username);
+				if( child.child_username== $scope.childUser.childUsername)
+					id = child.child_id;
+			}
+			return id;
+		}
+		// $scope.parseDate = function(s) {
+		//   var b = s.split(/\D+/);
+		//   return new Date(b[2], --b[0], b[1]);
+		// }
+		$scope.beyondTime = function(startDateTime, endDateTime){
+			//alert(startDateTime);alert(endDateTime);
+			//alert(Date.parseExact("29-11-2010", "dd-MM-yyyy"););
+			// alert(new Date(startDateTime));
+			// alert(new Date());
+			//alert($scope.parseDate(startDateTime));
+
+			var start = new Date(startDateTime.replace(/-/g, "/"));
+			var end = new Date(endDateTime.replace(/-/g, "/"));
+			if(start.getTime() <= end.getTime())
+				return false;
+			else
+				return true;
+		}
+
+		var newActivity = {};
+		$scope.setNewActivity = function(){
+			newActivity.activityName = $scope.activityName;
+			newActivity.activityMETS = $scope.getMET($scope.activityName);
+			newActivity.activityAddress = $scope.activityAddress;
+			newActivity.activityDescription = $scope.activityDescription;
+			newActivity.activityStartDateTime = $scope.setStartTime();
+			newActivity.activityEndDateTime = $scope.setEndTime();
+			if($scope.childUser.childUsername != ""){	
+				newActivity.user_id = $scope.getChildId();
+			}else{
+			  	newActivity.user_id = $scope.user._id;
+			  	// console.log($scope.childUsername);
+			}
+			newActivity.repeatEvents = $scope.repeatEvents;
+		  
+		}
+		// $scope.getMET = function(event_name){
+		// 	for(var i = 0; i < $scope.eventsList.length; i++){
+		// 		if($scope.eventsList[i].eventName == event_name){
+		// 			return $scope.eventsList[i].METS;
+		// 		}
+		// 	}
+		// }
+		$scope.getMET = function(event_name){
+		      //alert($scope.METList);
+		      for(var i = 0; i < $scope.METList.length; i++){
+		        if($scope.METList[i].eventName == event_name){
+		          return $scope.METList[i].METS;
+		        }
+		      }
+		      var start = new Date($scope.setStartTime().replace(/-/g, "/"));
+		      var end = new Date($scope.setEndTime().replace(/-/g, "/"));
+		      //alert();
+		      var scheduleTime = (end - start) / 60000;
+		      //alert(scheduleTime);
+		      if(scheduleTime > 30){
+		        event_name = event_name+" - hard effort";
+		      }else if(scheduleTime > 15){
+		        event_name = event_name+" - moderate effort";
+		      }else{
+		        event_name = event_name+" - light effort";
+		      }
+		      //alert(event_name);
+		      for(var i = 0; i < $scope.METList.length; i++){
+		        if($scope.METList[i].eventName == event_name){
+		          return $scope.METList[i].METS;
+		        }
+		      }
+		      
+		  }
+		  $scope.getUpdateMET = function(event_name, start_time, end_time){
+		      //alert($scope.METList);
+		      for(var i = 0; i < $scope.METList.length; i++){
+		        if($scope.METList[i].eventName == event_name){
+		          return $scope.METList[i].METS;
+		        }
+		      }
+		      var start = new Date(start_time.replace(/-/g, "/"));
+		      var end = new Date(end_time.replace(/-/g, "/"));
+		      //alert();
+		      var scheduleTime = (end - start) / 60000;
+		      //alert(scheduleTime);
+		      if(scheduleTime > 30){
+		        event_name = event_name+" - hard effort";
+		      }else if(scheduleTime > 15){
+		        event_name = event_name+" - moderate effort";
+		      }else{
+		        event_name = event_name+" - light effort";
+		      }
+		      //alert(event_name);
+		      for(var i = 0; i < $scope.METList.length; i++){
+		        if($scope.METList[i].eventName == event_name){
+		          return $scope.METList[i].METS;
+		        }
+		      }
+		      
+		  }
+
+		//repeat
+		$scope.repeatList = [{"repeatName" : "Daily"},{"repeatName" : "Weekly"}, {"repeatName" : "Monthly"}];
+		$scope.repeatFreList = [
+      		{"repeatFreName" : "1","dayTitle" : "Daily","weekTitle" : "Weekly","monthTitle" : "Monthly"},{"repeatFreName" : "2","dayTitle" : "Every 2 days","weekTitle" : "Every 2 weeks","monthTitle" : "Every 2 months"},{"repeatFreName" : "3","dayTitle" : "Every 3 days","weekTitle" : "Every 3 weeks","monthTitle" : "Every 3 months"},{"repeatFreName" : "4","dayTitle" : "Every 4 days","weekTitle" : "Every 4 weeks","monthTitle" : "Every 4 months"},{"repeatFreName" : "5","dayTitle" : "Every 5 days","weekTitle" : "Every 5 weeks","monthTitle" : "Every 5 months"},{"repeatFreName" : "6","dayTitle" : "Every 6 days","weekTitle" : "Every 6 weeks","monthTitle" : "Every 6 months"},{"repeatFreName" : "7","dayTitle" : "Every 7 days","weekTitle" : "Every 7 weeks","monthTitle" : "Every 7 months"},{"repeatFreName" : "8","dayTitle" : "Every 8 days","weekTitle" : "Every 8 weeks","monthTitle" : "Every 8 months"},{"repeatFreName" : "9","dayTitle" : "Every 9 days","weekTitle" : "Every 9 weeks","monthTitle" : "Every 9 months"},{"repeatFreName" : "10","dayTitle" : "Every 10 days","weekTitle" : "Every 10 weeks","monthTitle" : "Every 10 months"},{"repeatFreName" : "11","dayTitle" : "Every 11 days","weekTitle" : "Every 11 weeks","monthTitle" : "Every 11 months"},{"repeatFreName" : "12","dayTitle" : "Every 12 days","weekTitle" : "Every 12 weeks","monthTitle" : "Every 12 months"},{"repeatFreName" : "13","dayTitle" : "Every 13 days","weekTitle" : "Every 13 weeks","monthTitle" : "Every 13 months"},{"repeatFreName" : "14","dayTitle" : "Every 14 days,","weekTitle" : "Every 14 weeks","monthTitle" : "Every 14 months"},{"repeatFreName" : "15","dayTitle" : "Every 15 days","weekTitle" : "Every 15 weeks","monthTitle" : "Every 15 months"},{"repeatFreName" : "16","dayTitle" : "Every 16 days","weekTitle" : "Every 16 weeks","monthTitle" : "Every 16 months"},{"repeatFreName" : "17","dayTitle" : "Every 17 days","weekTitle" : "Weekly","monthTitle" : "Every 17 months"},{"repeatFreName" : "18","dayTitle" : "Every 18 days","weekTitle" : "Every 18 weeks","monthTitle" : "Every 18 months"},{"repeatFreName" : "19","dayTitle" : "Every 19 days","weekTitle" : "Every 19 weeks","monthTitle" : "Every 19 months"},{"repeatFreName" : "20","dayTitle" : "Every 20 days","weekTitle" : "Everym 20 weeks","monthTitle" : "Every 20 months"},{"repeatFreName" : "21","dayTitle" : "Every 21 days","weekTitle" : "Every 21 weeks","monthTitle" : "Every 21 months"},{"repeatFreName" : "22","dayTitle" : "Every 22 days","weekTitle" : "Every 22 weeks","monthTitle" : "Every 22 months"},{"repeatFreName" : "23","dayTitle" : "Every 23 days","weekTitle" : "Every 23 weeks","monthTitle" : "Every 23 months"},{"repeatFreName" : "24","dayTitle" : "Every 24 days","weekTitle" : "Every 24 weeks","monthTitle" : "Every 24 months"},{"repeatFreName" : "25","dayTitle" : "Every 25 days","weekTitle" : "Every 25 weeks","monthTitle" : "Every 25 months"},{"repeatFreName" : "26","dayTitle" : "Every 26 days","weekTitle" : "Every 26 weeks","monthTitle" : "Every 26 months"},{"repeatFreName" : "27","dayTitle" : "Every 27 days","weekTitle" : "Every 27 weeks","monthTitle" : "Every 27 months"},{"repeatFreName" : "28","dayTitle" : "Every 28 days","weekTitle" : "Every 28 weeks","monthTitle" : "Every 28 months"},{"repeatFreName" : "29","dayTitle" : "Every 29 days","weekTitle" : "Every 29 weeks","monthTitle" : "Every 29 months"},{"repeatFreName" : "30","dayTitle" : "Every 30 days","weekTitle" : "Every 30 weeks","monthTitle" : "Every 30 months"}];
+
+		$scope.isRepeated = function(){
+			if(document.getElementById('repeatCheckBox').checked){
+
+				$scope.repeatCheckBox = true;
+				$("#repeatEventModal").modal("show");
+				$scope.repeatStartDate = $scope.getDate($scope.eventDate._d,1);
+				
+			}else{
+				$scope.repeatCheckBox = false;
+				$scope.repeatEvents = {};
+				$scope.repeatEvents.flag = "0";
+				$scope.repeatSummary = "";
+
+
+			}
+		}
+
+		$scope.clearField = function(flag){
+			if(flag == 0){
+				$scope.repeatTimes = "";
+			}else{
+				$scope.repeatEndDate = null;
+			}
+		}
+
+
+		$scope.repeatEvents = {};
+		$scope.repeatEvents.flag = "0";
+		$scope.repeatUtil = {};//control frequency of daily weekly monthly and so on
+		$scope.setRepeatEvents = function(){
+			if($scope.repeatName == "Daily"){
+				$scope.repeatEvents.flag = "1";
+			}else if($scope.repeatName == "Weekly"){
+				$scope.repeatEvents.flag = "2";
+			}else{
+				$scope.repeatEvents.flag = "3";
+			}
+			
+			$scope.repeatEvents.repeatName = $scope.repeatName;
+			$scope.repeatEvents.repeatFreName = $scope.repeatFreName;
+			$scope.repeatEvents.repeatStartDate = $scope.repeatStartDate;
+			$scope.repeatEvents.repeatEndDate = ($scope.repeatTimes == "" ? $scope.repeatEndDate : $scope.repeatTimes);
+			if($scope.repeatName == null){
+				alert("The repeat should not be empty.")
+			  	return;
+			}
+			if($scope.repeatFreName == null){
+				alert("The repeat frequency should not be empty.")
+			  	return;
+			}
+			if($scope.repeatEvents.repeatEndDate == null){
+				alert("You should select one of end date.")
+			  	return;
+			}
+
+			if($scope.repeatEndDate != null && $scope.beyondTime($scope.repeatEvents.repeatEndDate,$scope.getDateOfLastDayOfOneYear())){
+				alert("The end date should be smaller than the end day of this year.")
+			  	return;
+			}
+			
+			if($scope.repeatEndDate != null && $scope.beyondTime($scope.repeatEvents.repeatStartDate,$scope.repeatEvents.repeatEndDate)){
+			  	alert("The end date should be larger than the start date.")
+			  	return;
+		  	}
+		  	if($scope.repeatTimes != "" && parseInt($scope.repeatTimes) >= 99){
+			  	alert("The repeat times should be less than 100.")
+			  	return;
+		  	}
+
+		  	if($scope.repeatName != null && $scope.repeatName == "Weekly"){
+		  		if($scope.repeatUtil.weekDay == null){
+		  			alert("The repeat on should not be empty");
+		  			return;
+		  		}else{
+		  			var count = 0;
+		  			var size = 0;
+		  			var repeatOn = [];
+		  			var i = 0;
+		  			for(var wd in $scope.repeatUtil.weekDay){
+		  				size++;
+		  				if($scope.repeatUtil.weekDay[wd] == false){
+		  					count++;
+		  				}else{
+		  					repeatOn[i++] = wd + "";
+		  				}
+		  			}
+		  			if(count == size){
+		  				alert("The repeat on should not be empty");
+		  				return;
+		  			}else{
+		  				$scope.repeatEvents.repeatOn = repeatOn;
+		  			}
+		  				
+		  		}
+		  	}
+
+		  	if($scope.repeatName != null && $scope.repeatName == "Monthly"){
+		  		if($scope.repeatUtil.monthDay == null){
+		  			alert("The repeat by should not be empty");
+		  			return;
+		  		}else{
+		  			if($scope.repeatUtil.monthDay == "dayOfMonth"){
+		  				var sd = new Date($scope.repeatStartDate.replace(/-/g, "/"));
+		  				sd.setDate(sd.getDate() + 1);
+		  				$scope.repeatEvents.repeatBy = sd.getDate();
+		  			}else{
+		  				$scope.repeatEvents.repeatBy = $scope.setDayOfWeek($scope.repeatStartDate);
+		  					
+		  			}
+		  		}
+		  	}
+
+		  	if($scope.repeatName == "Daily"){
+		  		$scope.setRepeatSummary(1);
+		  	}else if($scope.repeatName == "Weekly"){
+		  		$scope.setRepeatSummary(2);
+		  	}else{
+		  		$scope.setRepeatSummary(3);
+		  	}
+			
+			$("#repeatEventModal").modal("hide");
+
+		}
+
+		$scope.getDateOfLastDayOfOneYear = function(){
+			var td = new Date();
+			var year = td.getFullYear();
+			return year + "-" +"12" + "-" +"31" + " " + "23" + ":" + "59";
+			var ld = new Date(year.replace(/-/g, "/"))
+		}
+
+		$scope.repeatSummary = "";
+		$scope.setRepeatSummary = function(flag){
+			if(flag == 1){
+				$scope.repeatSummary = $scope.repeatFreList[parseInt($scope.repeatFreName) - 1].dayTitle + " , "
+					+ ($scope.repeatTimes == "" ? "util " + $scope.repeatEndDate : $scope.repeatTimes + " times");
+
+			}else if(flag == 2){
+				var repeatOnSummary = "";
+				if($scope.repeatEvents.repeatOn.length > 0){
+					var count = 0;
+					repeatOnSummary = repeatOnSummary + " on ";
+					for(var wd of $scope.repeatEvents.repeatOn){
+						repeatOnSummary += (wd + " ");
+						count++;
+					}
+
+					if(count == 7){
+						repeatOnSummary = " on All days ";
+					}
+				}
+				
+				$scope.repeatSummary = $scope.repeatFreList[parseInt($scope.repeatFreName) - 1].weekTitle + repeatOnSummary +  " , "
+					+ ($scope.repeatTimes == "" ? "util " + $scope.repeatEndDate : $scope.repeatTimes + " times");
+			}else if(flag == 3){
+				var repeatBySummary = "";
+				if($scope.repeatUtil.monthDay == "dayOfMonth"){
+					repeatBySummary = $scope.getDayOfMonth($scope.repeatStartDate);
+				}else{
+					repeatBySummary = $scope.getDayOfWeek($scope.repeatStartDate);
+				}
+				$scope.repeatSummary = $scope.repeatFreList[parseInt($scope.repeatFreName) - 1].monthTitle + " on " + repeatBySummary;
+			}
+		}
+
+		Date.prototype.getWeekOfMonth = function(weekStart) {  
+		    weekStart = (weekStart || 0) - 0;  
+		    if(isNaN(weekStart) || weekStart > 6)  
+		        weekStart = 0;  
+		  
+		    var dayOfWeek = this.getDay();  
+		    var day = this.getDate();  
+		    return Math.ceil((day - dayOfWeek - 1) / 7) + ((dayOfWeek >= weekStart) ? 1 : 0);  
+		}  
+
+		$scope.getWeekCounts = function(date) { 
+			var cd = new Date(date.replace(/-/g, "/"));
+			cd.setMonth(cd.getMonth() + 1);
+		    var first = new Date(cd.getFullYear(),cd.getMonth(),0).getDay();      
+		    var last = 32 - new Date(cd.getFullYear(),cd.getMonth(),32).getDate(); 
+		    return Math.ceil( (first + last)/7 );   
+		}
+
+		var numToString = ["last","first","second","third","fourth","fifth","sixth"];
+		var weekDayToString = ["Sunday","Monday","Tuesday","Wendesday","Thursday","Friday","Saturday"];
+		$scope.getDayOfWeek = function(date){
+			var d = new Date(date.replace(/-/g, "/"));
+			// alert($scope.getWeekCounts(d));
+			d.setDate(d.getDate() + 1);
+			// console.log(d.getDate()); date
+			// console.log(d.getDay()); week day
+			if(d.getDate() == 1){
+				return "the " + numToString[1] + " " + weekDayToString[d.getDay()];
+
+			}else if($scope.getWeekCounts(d) == d.getWeekOfMonth(1)){
+				return "the " + numToString[0] + " " + weekDayToString[d.getDay()];
+			}
+			return "the " + numToString[d.getWeekOfMonth(1)] + " " + weekDayToString[d.getDay()];
+			// return d.getWeekOfMonth();
+		}
+
+		$scope.setDayOfWeek = function(date){
+			var d = new Date(date.replace(/-/g, "/"));
+			// alert($scope.getWeekCounts(d));
+			d.setDate(d.getDate() + 1);
+			// console.log(d.getDate()); date
+			// console.log(d.getDay()); week day
+			if(d.getDate() == 1){
+				return numToString[1] + "," + d.getDay();
+
+			}else if($scope.getWeekCounts(d) == d.getWeekOfMonth(1)){
+				return numToString[0] + "," + d.getDay();
+			}
+			return numToString[d.getWeekOfMonth(1)] + "," + d.getDay();
+		}
+
+		$scope.getDayOfMonth = function(date){
+			var d = new Date(date.replace(/-/g, "/"));
+			d.setDate(d.getDate() + 1);
+			return "day " + d.getDate();
+		}
+
+		
+
+
+
+
+		$scope.addNewActivity = function(){
+		  $scope.formSubmitted = true;
+		  if(!validationService.isFormValid($scope.newActivityForm)) {
+		     return;
+		  }
+		  var postURL = '/actions/user/manage_calendar/add_new_activity_controller';
+		  // console.log($scope.childUser.childUsername);
+		  
+		  $scope.setNewActivity();
+		  if($scope.beyondTime(newActivity.activityStartDateTime,newActivity.activityEndDateTime)){
+		  	alert("The end date and time should be larger than the start date and time.")
+		  	return;
+		  }
+		  console.log(newActivity);
+		  var postData = newActivity;
+
+		  $http.post(postURL, postData)
+		    .success(function(result) {
+		      $scope.formSubmitted = false;
+		      alert(result.message);
+		      window.location.reload(); 
+		    })
+		    .error(function(error, result) {
+		      alert("Add new activity failure");
+		      return;
+		    });
+		}
+
+		$scope.eventSources = [$scope.showEvents,$scope.showChildrenEvents];
+	    $scope.calendar = $('#calendar');
+	    $scope.uiConfig = {
+		      calendar:{
+		        height: 450,
+		        editable: true,
+		        header:{
+		          left: 'month basicWeek basicDay',
+		          center: 'title',
+		          right: 'today prev,next'
+		        },
+		        defaultView: 'basicDay',
+		        dayClick: $scope.dayClick,
+		        eventDrop: $scope.alertOnDrop,
+		        eventResize: $scope.alertOnResize,
+		        eventClick: $scope.eventClick
+		    
+		    }//end calendar
+		}
+		$('#activityStart_time').timepicker ({'timeFormat': 'H:i','scrollDefault': 'now'});
+		$('#activityEnd_time').timepicker ({'timeFormat': 'H:i','scrollDefault': 'now'});
+		$('#eventStart_time').timepicker ({'timeFormat': 'H:i','scrollDefault': 'now'});
+		$('#eventEnd_time').timepicker ({'timeFormat': 'H:i','scrollDefault': 'now'});
+		$('#repeatEndDate').datepicker ({dateFormat: 'yy-mm-dd'});
+		
+		
+	});//end controller
+	
+</script>

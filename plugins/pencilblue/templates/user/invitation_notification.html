@@ -1,0 +1,18 @@
+^tmp_user=headFriendAcception^
+<div class="container" >
+	<a class="navbar-brand" href="/">
+		<img id="menu_logo" src="^site_menu_logo^"></img>
+	</a>
+	<div class="jumbotron" ng-modal = "invi_status" ng-if = "invi_status == 1">
+	  <h2>You accepted the invitation successfully!</h2>  
+	</div>
+	<div class="jumbotron" ng-modal = "invi_status" ng-if = "invi_status == 0">
+	  <h2>You can not accept or reject the invitation since the relationship has been removed!</h2>  
+	</div>
+	<div class="jumbotron" ng-modal = "invi_status" ng-if = "invi_status == -1">
+	  <h2>You rejected the invitation!</h2>  
+	</div>
+ 
+</div>
+^tmp_angular=user=invitation_notification^
+^tmp_admin=footer^

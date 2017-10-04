@@ -1,0 +1,340 @@
+^tmp_user=head^
+<div class="col-md-9" style="padding: 0">
+    ^tmp_user=elements=topMenu^ ^tmp_admin=elements=error_success^ ^tmp_admin=elements=sub_nav^ ^tmp_admin=elements=tab_nav^
+    <form name="userForm" ng-submit="saveUser()" novalidate>
+        <fieldset>
+            <div class="tab-content">
+                <div class="tab-pane active" id="account_info">
+                    <div class="form-group" ng-class="{'has-error': !isFieldValid(userForm.username)}">
+                        <label>^loc_USERNAME^</label>
+                        <div class="input-group">
+                            <input name="username" class="form-control" ng-model="user.username" ng-change="resetUsernameAvailability()" required></input>
+                            <span class="input-group-btn">
+                  <button type="button" class="btn" ng-class="{'btn-default': usernameAvailable === null, 'btn-success': usernameAvailable === true, 'btn-danger': usernameAvailable === false}" ng-click="getUsernameAvailability()" ng-disabled="!canCheckUsername()">
+                    <span ng-if="usernameAvailable === null">^loc_CHECK^</span>
+                            <span ng-if="usernameAvailable === true"><i class="fa fa-check"></i>&nbsp;^loc_AVAILABLE^</span>
+                            <span ng-if="usernameAvailable === false"><i class="fa fa-ban"></i>&nbsp;^loc_UNAVAILABLE^</span>
+                            </button>
+                            </span>
+                        </div>
+                        <div class="form_error" ng-if="!isFieldValid(userForm.username)">^loc_REQUIRED_FIELD^</div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': !isFieldValid(userForm.email)}">
+                        <label>^loc_EMAIL^</label>
+                        <input type="email" name="email" class="form-control" ng-model="user.email" required></input>
+                        <div class="form_error" ng-if="!isFieldValid(userForm.email)">^loc_REQUIRED_FIELD^</div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': !isFieldValid(userForm.locale)}">
+                        <label>^loc_LOCALE_PREFERENCE^</label>
+                        <select name="locale" class="form-control" ng-model="user.locale" ng-options="localeOption.value as localeOption.name for localeOption in locales" required></select>
+                        <div class="form_error" ng-if="!isFieldValid(userForm.admin)">^loc_REQUIRED_FIELD^</div>
+                    </div>
+                    <div ng-if="user.admin == 1 && parentUser._id != user._id">
+                        <button type="button" class="btn btn-primary btn-md" ng-click="disableChid()">Disable</button>
+                        <br>
+                        </br>
+                    </div>
+                    <div ng-if="user.admin == 2 && parentUser._id != user._id">
+                        <button type="button" class="btn btn-primary btn-md" ng-click="activeChild()">Active</button>
+                        <br>
+                        </br>
+                    </div>
+                    <div ng-if=" parentUser._id == user._id && parentUser.admin == 0">
+                        <label>Registered Children List</label>
+                        <table class="table table-striped table-bordered table-hover sortable">
+                            <thead>
+                                <tr>
+                                    <th>User Name</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>Last Data Extraction Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="odd gradeX" ng-repeat="register_child in register_children">
+                                    <td>{{register_child.username}}</td>
+                                    <td>{{register_child.first_name}}</td>
+                                    <td>{{register_child.last_name}}</td>
+                                    <td>{{register_child.email}}</td>
+                                    <td>{{register_child.lastDataExtractionDate}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--end list-->
+                </div>
+                <!-- end tab-pane -->
+                <div class="tab-pane" id="personal_info">
+                    ^tmp_admin=elements=upload_and_link_photo^
+                    <div class="form-group">
+                        <label>^loc_FIRST_NAME^</label>
+                        <input type="text" class="form-control" ng-model="user.first_name"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>^loc_LAST_NAME^</label>
+                        <input type="text" class="form-control" ng-model="user.last_name"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Middle name</label>
+                        <input type="text" class="form-control" ng-model="user.middle_name"></input>
+                    </div>
+                    <div class="form-group" ng-if="user.admin == 0 || (user.admin == 1 && user._id == parentUser._id)" ng-class="{'has-error': !isFieldValid(userForm.dateOfBirth)}">
+                        <label>Date of birth</label>
+                        <div class="input-group">
+                            <input type="text" name="dateOfBirth" id="dateOfBirth" class="form-control ng-pristine ng-valid ng-valid-required" ng-model="user.dateOfBirth"></input>
+                            <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" ng-click="setDateOfBirthToNow()">^loc_NOW^</button>
+                    </span>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-if="user.admin == 0 || (user.admin == 1 && user._id == parentUser._id)">
+                        <label>Age</label>
+                        <input type="text" class="form-control" ng-model="user.age"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" id="gender" value="male" checked>Male
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" id="gender" value="female">Female
+                        </label>
+                    </div>
+                    <div class="form-group" ng-if="user.admin == 0 || (user.admin == 1 && user._id == parentUser._id)">
+                        <label>Weight</label>
+                        <input type="text" class="form-control" ng-model="user.weight"></input>
+                    </div>
+                    <div class="form-group" ng-if="user.admin == 0 || (user.admin == 1 && user._id == parentUser._id)">
+                        <label>Height</label>
+                        <input type="text" class="form-control" ng-model="user.height"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Hobbies</label>
+                        <textarea type="textarea" rows="3" class="form-control" ng-model="user.hobbies"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Notification preferred</label>
+                        <textarea type="textarea" rows="3" class="form-control" ng-model="user.preferNotification"></textarea>
+                    </div>
+                    <div class="form-group" ng-class="{ 'has-error' : userForm.emailContact.$invalid && !userForm.emailContact.$pristine }">
+                        <label>Email Contact</label>
+                        <input type="email" name="emailContact" class="form-control" ng-model="user.emailContact">
+                        <p ng-show="userForm.emailContact.$invalid && !userForm.emailContact.$pristine" class="help-block">Enter a valid email.</p>
+                    </div>
+                </div>
+                <!-- end tab-pane -->
+                <div class="tab-pane" id="daily_report">
+                    <table class="table table-striped table-bordered table-hover sortable" ng-if="user._id != parentUser._id">
+                        <thead>
+                            <tr>
+                                <th>User Name</th>
+                                <th>Date</th>
+                                <th>Steps</th>
+                                <th>Steps Points</th>
+                                <th>Min in Heart Rate Zone</th>
+                                <th>Heart Rate Points</th>
+                                <th>Hours Sleep</th>
+                                <th>Sleep Points</th>
+                                <th>Nutrition Calories</th>
+                                <th>Cardio</th>
+                                <th>Core</th>
+                                <th>Flexibility</th>
+                                <th>Weights</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="odd gradeX" ng-repeat="daily_report in daily_reports">
+                                <td>{{daily_report.username}}</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.date}}</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.fitbit_activityData['activities-steps'][0]['value']}}</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.stepPoints}}</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.fitbit_heartrateData['activities-heart'][0]['value'].heartRateZones[0].min}}</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.hearRatePoints}}</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.fitbit_sleepData.summary.totalMinutesAsleep}}</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.sleepPoints}}</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.fitbit_nutritionData['summary']['calories']}}</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">X</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">X</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">X</td>
+                                <td ng-if="daily_report.fitbit_data == 1 ">Unread</td>
+                                <td ng-if="daily_report.fitbit_data != 1 ">X</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="form-group" ng-if="user._id == parentUser._id">
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <!-- <pre>Date: <em>{{dateRange.start_date | date:'fullDate' }}</em></pre> -->
+                            <div class="input-group">
+                                <input type="date" name="start_date" id="start_date" class="form-control" ng-model="dateRange.start_date"></input>
+                                <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" ng-click="setDateToNow(0)">^loc_NOW^</button>
+                    </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <div class="input-group">
+                                <input type="date" name="end_date" id="end_date" class="form-control" ng-model="dateRange.end_date"></input>
+                                <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" ng-click="setDateToNow(1)">^loc_NOW^</button>
+                    </span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                        </div>
+                        <div class="form-group">
+                            <table class="table sortable table-striped table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Child Username</th>
+                                        <th>Child Name</th>
+                                        <th class="sorttable_nosort">Checkbox</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="odd gradeX" ng-repeat="reg_child in register_children">
+                                        <td>{{reg_child.username}}</td>
+                                        <td>{{reg_child.first_name}} {{reg_child.last_name}}</td>
+                                        <td>
+                                            <input type="checkbox" data-checklist-model="checkboxList.roles" data-checklist-value="reg_child">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary" ng-click="confirmDataExtraction()">Confirm</button>
+                        </div>
+                    </div>
+                    <!-- end extract   -->
+                    <!-- <pre ng-bind="checkboxList.roles | json"></pre>   -->
+                </div>
+                <!-- end tab-pane -->
+                <div class="tab-pane" id="calculate_ipal">
+                    <div class="form-group" ng-if="user._id == parentUser._id">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <!-- <pre>Date: <em>{{dateRange.start_date | date:'fullDate' }}</em></pre> -->
+                            <div class="input-group">
+                                <input type="date" name="start_date" id="start_date" class="form-control" ng-model="dateRange.start_date"></input>
+                                <span class="input-group-btn">
+                                  <button class="btn btn-default" type="button" ng-click="setDateToNow(0)">^loc_NOW^</button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                        </div>
+                        <div class="form-group">
+                            <table class="table sortable table-striped table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Child Username</th>
+                                        <th>Child Name</th>
+                                        <th class="sorttable_nosort">Checkbox</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="odd gradeX" ng-repeat="reg_child in register_children">
+                                        <td>{{reg_child.username}}</td>
+                                        <td>{{reg_child.first_name}} {{reg_child.last_name}}</td>
+                                        <td>
+                                            <input type="checkbox" data-checklist-model="checkboxList.roles" data-checklist-value="reg_child">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary" ng-click="calculateIpal()">Update IPAL Score</button>
+                        </div>
+                    </div>
+                    <!-- end extract   -->
+                    <!-- <pre ng-bind="checkboxList.roles | json"></pre>   -->
+                </div>
+                <!-- end tab-pane -->
+                <div class="tab-pane" id="fitbit_info">
+                    <div class="form-group">
+                        <label>Fitbit Age</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.age" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit AverageDailySteps</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.averageDailySteps" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit DisplayName</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.displayName" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit DistanceUnit</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.distanceUnit" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit EncodedId</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.encodedId" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit FullName</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.fullName" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit Gender</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.gender" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit Height</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.height" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit Locale</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.locale" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit MemberSince</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.memberSince" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit StrideLengthRunning</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.strideLengthRunning" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit StrideLengthWalking</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.strideLengthWalking" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit Timezone</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.timezone" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit Weight</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.weight" readonly="readonly"></input>
+                    </div>
+                    <div class="form-group">
+                        <label>Fitbit WeightUnit</label>
+                        <input type="text" class="form-control" ng-model="fitbitUser.weightUnit" readonly="readonly"></input>
+                    </div>
+                </div>
+                <!-- end tab-pane -->
+                <a class="btn btn-default" href="/" ng-if="document.activeElement.id == daily_report">
+                    <i class="fa fa-ban"></i>&nbsp;^loc_CANCEL^
+                </a>
+                ^tmp_admin=elements=save_button^
+            </div>
+            <div class="additions" style="display: none"></div>
+        </fieldset>
+    </form>
+</div>
+^tmp_angular=user=manage_account^ ^tmp_admin=footer^

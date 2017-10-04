@@ -1,0 +1,72 @@
+^tmp_user=headGoals^
+  <div class="col-md-9" style="padding: 0">
+    ^tmp_user=elements=topMenu^
+    ^tmp_admin=elements=error_success^
+    ^tmp_admin=elements=sub_nav^
+    ^tmp_admin=elements=tab_nav^
+      <div class="tab-content">
+      <div class="tab-pane active" id="friend_management">
+            <table class="table table-striped table-bordered table-hover" >
+              <thead>
+                  <tr>
+                      <th>User Name</th>
+                      <th>Goal Name</th>
+                      <th>Goal Type</th>
+                      <th>Goal</th>
+                      <!-- <th>Finished(Yes/NO)</th> -->
+                      <th ng-if="adminLevel == 0">Action</th>
+                  </tr>
+              </thead>
+              <tbody ng-repeat="goal in goals" ng-if="goal" ng-form="goalForm" >
+                  <tr class="odd gradeX">
+                      <td >{{goal.username}}</td>
+                      <td ><input  ng-if="adminLevel == 0" name="name" class="form-control" ng-model="goal.name"></input>
+                            <input ng-if="adminLevel == 1" name="name" class="form-control" ng-model="goal.name" disabled="true"></input>
+                      </td>
+                      <td>
+                        <select ng-if="adminLevel == 0" name="goal._id" ng-model="goal.type"  class="form-control">
+                            <option 
+                              ng-selected="{{type.type_name == goal.type}}"
+                              ng-repeat="type in types"
+                              value="{{type.type_name}}">
+                              {{type.type_name}}
+                                </option>
+                        </select>
+                        <select ng-if="adminLevel == 1" name="goal._id" ng-model="goal.type" disabled="true" class="form-control">
+                            <option 
+                              ng-selected="{{type.type_name == goal.type}}"
+                              ng-repeat="type in types"
+                              value="{{type.type_name}}">
+                              {{type.type_name}}
+                                </option>
+                        </select>
+                      </td>
+                      <td><input ng-if="adminLevel == 0" name="goal" class="form-control" ng-model="goal.goal"></input>
+                          <input ng-if="adminLevel == 1" name="goal" class="form-control"  disabled="true" ng-model="goal.goal"></input>
+                      </td>
+                      <!-- <td >
+                          <div class="radio" ng-if="adminLevel == 0" >
+                            <label><input  type="radio" ng-name="goal._id"  value="true"   data-ng-model="goal.finished">YES</label> 
+                            <label><input type="radio"  ng-name="goal._id"  value="false"  data-ng-model="goal.finished">NO</label>
+                          </div>
+                          <div class="radio" ng-if="adminLevel == 1" >
+                            <label><input  type="radio" ng-name="goal._id" disabled="true" value="true"   data-ng-model="goal.finished">YES</label> 
+                            <label><input type="radio"  ng-name="goal._id" disabled="true" value="false"  data-ng-model="goal.finished">NO</label>
+                          </div>
+                      </td> -->
+                      <td ng-if="adminLevel == 0">
+                        <button type="submit" class="btn btn-primary btn-sm"  ng-click="saveGoal(goal)"><i class="fa fa-refresh"></i>&nbsp;Update</button>
+
+                        <button type="submit" class="btn btn-primary btn-sm"  ng-click="deleteGoal(goal)"><i class="fa fa-ban"></i>&nbsp;Delete</button>
+                      </td>
+                  </tr>
+               
+              </tbody>
+
+            </table>
+      </div>
+
+    </div>
+  </div>
+^tmp_angular=user=manage_goals^
+^tmp_admin=footer^

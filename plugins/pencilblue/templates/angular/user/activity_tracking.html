@@ -1,0 +1,371 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script src="http://d3js.org/d3.v3.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script type="text/javascript" src="/js/barchart.js"></script>
+<script type="text/javascript" src="/js/barchart2.js"></script>
+<script type="text/javascript" src="/js/donut3d.js"></script>
+<script type="text/javascript" src="/js/line_chart.js"></script>
+<script type="text/javascript" src="/js/line_chart2.js"></script>
+<script type="text/javascript" src="/js/line_chart3.js"></script>
+
+<script src="/js/Chart.min.js"></script>
+<script src="/js/angular-chart.min.js"></script>
+
+<script type="text/javascript">
+angular.module('pencilblueApp', ['validation', 'uploadPhoto', 'chart.js'])
+.controller('PencilBlueController', function($scope, $rootScope, $http, $window, validationService) {
+  ^angular_objects^
+
+  $scope.usernameAvailable = null;
+  var scheduledTimeScore = [];
+  var durationTimeScore = [];
+  $scope.generateData = function(){
+
+    for (i = 0; i < $scope.scheduledTimeScore.length; i++) {
+        r = Math.floor(Math.random() * 200);
+        g = Math.floor(Math.random() * 200);
+        b = Math.floor(Math.random() * 200);
+        v = Math.floor(Math.random() * 500);
+        c = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+        h = 'rgb(' + (r+20) + ', ' + (g+20) + ', ' + (b+20) + ')';
+        scheduledTimeScore.push( {
+          value : $scope.scheduledTimeScore[i],
+          label : 'item ' + i,
+          color: c,
+          highlight: h
+        });
+        durationTimeScore.push( {
+          value : $scope.durationTimeScore[i],
+          label : 'item ' + i,
+          color: c,
+          highlight: h
+        });
+    };
+  }
+  console.log("time score:" + scheduledTimeScore);
+  $scope.generateData();
+  // $scope.scheduledActivityLabels = "Scheduled Daily Activity";
+  // $scope.scheduledActivityData = scheduledTimeScore;
+  // $scope.labels2 = ["Actual Daily Activity"];
+  // $scope.data2 = durationTimeScore;
+  Donut3D.draw("salesDonut", "Scheduled Daily Activity", scheduledTimeScore, 150, 150, 130, 100, 30, 0.4);
+  Donut3D.draw("quotesDonut", "Actual Daily Activity", durationTimeScore, 150, 150, 130, 100, 30, 0);
+
+  $scope.setDailyChart = function(){
+      // console.log($scope.dailyPA);
+      var tempDailyPAL = $scope.dailyPA;
+        // alert("yes");
+      tempDailyPAL.sort(function(a, b) {
+        var aDate = new Date(a.date);
+        var bDate = new Date(b.date);
+        return bDate.getTime() - aDate.getTime();
+      });
+      var offset = 0;
+      var dailyPAL = [];
+      var activity_coefficient_arr = [];
+      var activity_date_arr = [];
+      var k=0;
+      while (k<30){
+        activity_date_arr[k] = $scope.getDate(new Date(), k+1);
+        k++;
+      }
+      activity_date_arr.sort();
+
+      for (var i = 0; i< activity_date_arr.length; i++){
+        for (var j=0;j<tempDailyPAL.length;j++){
+          if (activity_date_arr[i] == tempDailyPAL[j].date){
+            activity_coefficient_arr[i] = tempDailyPAL[j].activity_coefficient;
+          }
+        }
+      }
+
+      $scope.dailylabels = activity_date_arr;
+      $scope.daily_data = activity_coefficient_arr;
+
+      // var j = 0;
+      // for(var i = 0; i < tempDailyPAL.length;){
+      //   if(j < 30){
+      //     // console.log("++"+j);
+      //     var dataDate = $scope.getDate(new Date(), offset);
+      //     var checkDate = $scope.compareDate(dataDate,tempDailyPAL[i].date);
+      //     // console.log(">>" + dataDate + ">>"+ tempDailyPAL[i].date +">>"+checkDate);
+      //     if(checkDate == 0){
+      //       dailyPAL[j++] = tempDailyPAL[i++];
+      //       activity_coefficient_arr[j++] = tempDailyPAL[i++].activity_coefficient;
+      //       offset++;
+      //     }else if(checkDate < 0){
+      //       i++;
+      //     }else if(checkDate > 0){
+      //       var data = {};
+      //       data.date = dataDate;
+      //       data.PAL = 0;
+      //       //data.schePAL = 0;
+      //       dailyPAL[j++] = data;
+      //       offset++;
+      //     }
+      //   }else{
+      //     break;
+      //   }
+      // }
+      // while(j < 30){
+      //   var dataDate = $scope.getDate(new Date(), offset);
+      //   var data = {};
+      //   data.date = dataDate;
+      //   data.PAL = 0;
+      //   //data.schePAL = 0;
+      //   dailyPAL[j++] = data;
+      //   offset++;
+      // }
+      // dailyPAL.sort(function(a,b){
+      //   var aDate = new Date(a.date);
+      //   var bDate = new Date(b.date);
+      //   return aDate.getTime() - bDate.getTime();
+      // });
+
+      // draw_bar_chart(dailyPAL,0);
+  }
+
+  $scope.setWeeklyChart = function(){
+      var weekLabel = [];
+      weekLabel[0] = "Five weeks ago";
+      weekLabel[1] = "Four weeks ago";
+      weekLabel[2] = "Three weeks ago";
+      weekLabel[3] = "Two weeks ago";
+      weekLabel[4] = "One week ago";
+      weekLabel[5] = "Current week";
+      var tempDailyPAL = $scope.dailyPA;
+      
+      tempDailyPAL.sort(function(a, b) {
+        var aDate = new Date(a.date);
+        var bDate = new Date(b.date);
+        return bDate.getTime() - aDate.getTime();
+      });
+
+      var activity_coefficient_arr = [];
+      $scope.weeklabels = weekLabel;
+
+      var weeklyPAL = [];
+      var today = $scope.getDate(new Date(),0);
+      var j = 0;
+      for(var i = 0; i < 6; i++){
+        var firstDay = $scope.getFirstDayOfOneWeek(today,i*7);
+        var actuSumPAL = 0;
+        //var scheSumPAL = 0;
+        for(; j < tempDailyPAL.length; j++){
+          var checkDate1 = $scope.compareDate(firstDay,tempDailyPAL[j].date);
+          var checkDate2 = $scope.compareDate(today,tempDailyPAL[j].date);
+          if(checkDate1 <= 0 && checkDate2 >= 0){
+            actuSumPAL += parseFloat(tempDailyPAL[j].activity_coefficient);
+            //scheSumPAL += tempDailyPAL[j].schePAL;
+          }else if(checkDate2 < 0){
+            continue;
+          }else if(checkDate1 > 0){
+            break;
+          }
+        }
+      
+        var data = {};
+        data.date = weekLabel[i];
+        data.weekNum = i;
+        data.PAL = 0;
+        data.activity_coefficient = actuSumPAL;
+        //data.schePAL = scheSumPAL;
+        
+        weeklyPAL[i] = data;
+        activity_coefficient_arr[i] = actuSumPAL;
+      }
+      weeklyPAL.sort(function(a,b){
+        var aNum = a.weekNum;
+        var bNum = b.weekNum;
+        return bNum - aNum;
+      });
+      $scope.weekly_data = activity_coefficient_arr.reverse();
+      //draw_bar_chart(weeklyPAL,1);
+  }
+
+  $scope.setMonthlyChart = function(){
+      var monthLabel = [];
+      monthLabel[0] = "Five months ago";
+      monthLabel[1] = "Four months ago";
+      monthLabel[2] = "Three months ago";
+      monthLabel[3] = "Two months ago";
+      monthLabel[4] = "One month ago";
+      monthLabel[5] = "Current month";
+
+      var tempDailyPAL = $scope.dailyPA;
+      tempDailyPAL.sort(function(a, b) {
+        var aDate = new Date(a.date);
+        var bDate = new Date(b.date);
+        return bDate.getTime() - aDate.getTime();
+      });
+
+      var activity_coefficient_arr = [];
+      $scope.monthlabels = monthLabel;
+
+
+      var monthlyPAL = [];
+      var today = $scope.getDate(new Date(),0);
+      
+      var j = 0;
+      for(var i = 0; i < 6; i++){
+        var firstDay = $scope.getFirstDayOfOneMonth(today,i);
+        var actuSumPAL = 0;
+        //var scheSumPAL = 0;
+        for(; j < tempDailyPAL.length; j++){
+          var checkDate1 = $scope.compareDate(firstDay,tempDailyPAL[j].date);
+          var checkDate2 = $scope.compareDate(today,tempDailyPAL[j].date);
+          if(checkDate1 <= 0 && checkDate2 >= 0){
+            actuSumPAL += parseFloat(tempDailyPAL[j].activity_coefficient);
+            //scheSumPAL += tempDailyPAL[j].schePAL;
+          }else if(checkDate2 < 0){
+            continue;
+          }else if(checkDate1 > 0){
+            break;
+          }
+        }
+
+        var data = {};
+        data.date = monthLabel[i];
+        data.monthNum = i;
+        data.PAL = 0;
+        data.activity_coefficient = actuSumPAL;
+        //data.schePAL = scheSumPAL
+        monthlyPAL[i] = data;
+        activity_coefficient_arr[i] = actuSumPAL.toFixed(2);
+      }
+      monthlyPAL.sort(function(a,b){
+        var aNum = a.monthNum;
+        var bNum = b.monthNum;
+        return bNum - aNum;
+      });
+      $scope.monthly_data = activity_coefficient_arr.reverse();
+      //draw_bar_chart(monthlyPAL,2);
+  }
+
+  $scope.setLineChart = function(){
+      var tempActualDailyPAL = $scope.dailyPAL;
+      // $scope.labels = ["January", "February", "March", "April", "May", "June", "July"];
+      var arr = [];
+      var label = [];
+      tempActualDailyPAL.sort(function(a, b) {
+        var aDate = new Date(a.date);
+        var bDate = new Date(b.date);
+        return aDate.getTime() - bDate.getTime();
+      });
+      
+      var tempGoals = $scope.goals;
+      tempGoals.sort(function(a, b) {
+        var aGoal = new Date(a.goal);
+        var bGoal = new Date(b.goal);
+        return aGoal - bGoal;
+      });
+      console.log(tempActualDailyPAL);
+      for (var i=0; i<tempActualDailyPAL.length;i++){
+        label[i] = tempActualDailyPAL[i].date;
+        console.log(tempActualDailyPAL[i].date);
+      }
+      var actualGoals = [];
+      var actualDailyPAL = [];
+      var sumDaily = 0;
+      var k = 0;
+      for(var i = 0; i < tempActualDailyPAL.length; i++){
+          sumDaily += tempActualDailyPAL[i].PAL; 
+          while(true){
+              var j = 0;
+              if(tempGoals.length > 0){
+                if(sumDaily >= parseInt(tempGoals[j].goal)){
+                  var goalData = {};
+                  goalData.date = tempActualDailyPAL[i].date;
+                  goalData.goal = tempGoals[j].goal;
+                  actualGoals[k++] = goalData;
+                  tempGoals.splice(j,1);   
+                }else{
+                  break;
+                }
+              }else{
+                break;
+              }
+          }
+          arr[i] = sumDaily;
+          var data = {};
+          data.PAL = sumDaily;
+          data.date = tempActualDailyPAL[i].date;
+          actualDailyPAL[i] = data;
+      }
+      // draw_line_chart(actualDailyPAL,actualGoals);
+      $scope.labels = label;
+      $scope.data = arr;//[1,2,3,4,5,6,7,8,9,0];
+  }
+  
+  $scope.compareDate = function(today, event_date){
+    var td = new Date(today);
+    var eventDate = new Date(event_date);
+    if(td.getTime() == eventDate.getTime()){
+      return 0;
+    }else if(td.getTime() < eventDate.getTime()){
+      return -1;
+    }else{
+      return 1;
+    }
+
+  }
+
+  $scope.getDate = function(event_date, offset){
+    var eventDate = new Date(event_date);
+    
+    eventDate.setDate(eventDate.getDate() - offset);
+    var month = '' + (eventDate.getMonth() + 1);
+    var day = '' + eventDate.getDate();
+    var year = eventDate.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  };
+
+  
+
+  $scope.getFirstDayOfOneWeek = function(date, offset){
+    date = new Date(date);
+    date.setDate(date.getDate() + 1 - offset);
+    var day = date.getDay(),
+        diff = date.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+        date.setDate(diff);
+    return $scope.getDate(date,0);
+  }
+
+  $scope.getFirstDayOfOneMonth = function(date, offset){
+    date = new Date(date);
+    var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    firstDay.setMonth(firstDay.getMonth() - offset);
+    return $scope.getDate(firstDay,0);
+  }
+  $scope.setDailyChart();
+  $scope.setWeeklyChart();
+  $scope.setMonthlyChart();
+
+
+  
+  $scope.setLineChart();
+  
+  $scope.saveActivity = function() {
+    $scope.formSubmitted = true;
+    $scope.saving = true;
+
+    var postURL = '/actions/user/activity_tracking';
+
+    $http.post(postURL, $scope.user)
+    .success(function(result) {
+      $scope.successMessage = result.message;
+      $scope.saving = false;
+    })
+    .error(function(error, status) {
+      $scope.errorMessage = error.message;
+      $scope.saving = false;
+    });
+  };
+    
+});
+</script>

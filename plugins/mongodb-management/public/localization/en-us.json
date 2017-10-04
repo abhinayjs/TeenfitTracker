@@ -1,0 +1,5 @@
+{
+  "mongodbManage_SUCCESS": "Your mongodbManage inquiry was successfully submitted",
+  "mongodbManage_ERROR": "There was an error submitting your mongodbManage inquiry",
+  "mongodbManage_INVALID": "Your name and email address are required"
+}

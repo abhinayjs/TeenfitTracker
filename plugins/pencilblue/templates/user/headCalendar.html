@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="pencilblueApp">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>^page_name^</title>
+    <meta name="description" content="^meta_desc^">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="robots" content="noindex">
+
+    <link rel="shortcut icon" href="^site_icon^">
+    <link rel="stylesheet" type="text/css" href="^jquery_ui_css_src^">
+    <link rel="stylesheet" type="text/css" href="^bootstrap_css_src^">
+    <link rel="stylesheet" type="text/css" href="^font_awesome_src^">
+    <link rel="stylesheet" type="text/css" href="^ng_sortable_css_src^">
+    <link rel="stylesheet" type="text/css" href="^ng_sortable_style_css_src^">
+    <link rel="stylesheet" type="text/css" href="/css/admin.css">
+    
+
+    <link rel="stylesheet" href="/bower_components/fullcalendar/dist/fullcalendar.css"/>
+    <link rel="stylesheet" href="/bower_components/timepicker/jquery.timepicker.css"/>
+    <link rel="stylesheet" type="text/css" href="^jquery_datetime_picker_css_src^">
+
+    <script type="text/javascript" src="^jquery_src^"></script>
+    <script type="text/javascript" src="^jquery_validate_src^"></script>
+    <script type="text/javascript" src="^jquery_ui_js_src^"></script>
+    <script type="text/javascript" src="^bootstrap_js_src^"></script>
+    <script type="text/javascript" src="^angular_src^"></script>
+    <script type="text/javascript" src="^angular_route_src^"></script>
+    <script type="text/javascript" src="^ng_sortable_js_src^"></script>
+    <script type="text/javascript" src="/js/form.js"></script>
+    
+    <script type="text/javascript" src="^jquery_datetime_picker_js_src^"></script>
+    <script type="text/javascript" src="/bower_components/timepicker/jquery.timepicker.js"></script>
+
+    <!-- jquery, moment, and angular have to get included before fullcalendar -->
+    <!--<script type="text/javascript" src="^jquery_src^"></script>
+    <script type="text/javascript" src="^bootstrap_js_src^"></script>-->
+    <!--<script type="text/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script>-->
+    <script type="text/javascript" src="/bower_components/moment/min/moment.min.js"></script>
+    <!--<script type="text/javascript" src="/bower_components/angular/angular.min.js"></script>-->
+    <script type="text/javascript" src="/bower_components/angular-ui-calendar/src/calendar.js"></script>
+    <script type="text/javascript" src="/bower_components/fullcalendar/dist/fullcalendar.min.js"></script>
+    <script type="text/javascript" src="/bower_components/fullcalendar/dist/gcal.js"></script>
+    <!-- add new here -->
+    <script src="/bower_components/angular-audio/app/angular.audio.js"></script>
+
+    <!-- build:js({app,.tmp}) scripts/main.js -->
+    ^localization_script^
+    ^analytics^
+  </head>
+
+  <body ng-controller="PencilBlueController">
+    <div id="wrap" style="background: #FFFFCC"> 
+        ^tmp_user=elements=topMenu_calendar^
+      

@@ -1,0 +1,45 @@
+^tmp_user=head^
+<div class="col-md-9" style="padding: 0">
+	^tmp_user=elements=topMenu^
+	^tmp_admin=elements=error_success^ 
+	^tmp_admin=elements=sub_nav^
+	^tmp_admin=elements=tab_nav^
+	<form name="userActivityForm" ng-submit="saveUserActivity()" novalidate>
+		<fieldset>
+			<div class="tab-content">
+				<div class="tab-pane active" id="donut_chart">
+					<div class="form-group">
+						
+						<svg id="salesDonut" width="300" height="300"></svg>
+						
+						<!-- <svg id="quotesDonut" width="800" height="300"></svg> -->
+						<canvas id="doughnut" class="chart chart-doughnut" chart-data="scheduledActivityData" chart-labels="scheduledActivityLabels"></canvas> 
+						<!-- <canvas id="doughnut" class="chart chart-doughnut" chart-data="data2" chart-labels="labels"></canvas>  -->
+					</div>
+				</div>
+				<div class="tab-pane" id="bar_chart">
+					<div class="form-group">
+						<!-- <svg id="barChartDaily"></svg> -->
+						<!-- <svg id="barChartWeekly"></svg> -->
+						<!-- <svg id="barChartMonthly"></svg> -->
+						<canvas id="bar" class="chart chart-bar" chart-data="daily_data" chart-labels="dailylabels" chart-series="series"></canvas>
+						<canvas id="bar" class="chart chart-bar" chart-data="weekly_data" chart-labels="weeklabels" chart-series="series"></canvas>
+						<canvas id="bar" class="chart chart-bar" chart-data="monthly_data" chart-labels="monthlabels" chart-series="series"></canvas>
+					</div>
+				</div>
+				<div class="tab-pane" id="line_chart">
+					<div class="form-group">
+						<!-- <svg id="line_view"> -->
+						<canvas id="line" class="chart chart-line" chart-data="data" chart-labels="labels" chart-series="series" 
+						chart-options="options"> </canvas>
+						</svg>
+					</div>
+				</div>
+				^tmp_angular=admin=elements=activity_tracking^
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+^tmp_angular=user=activity_tracking^ 
+^tmp_admin=footer^

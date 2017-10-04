@@ -1,0 +1,64 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript" src="/js/angular/services/password.js"></script>
+<script type="text/javascript" src="/js/angular/services/email.js"></script>
+<script type="text/javascript" src="/js/angular/filters/parsable_date.js"></script>
+<script type="text/javascript" src="/js/checklist/checklist-model.js"></script>
+<script type="text/javascript" src="/js/waiting/waitingbar.js"></script>
+<script type="text/javascript">
+angular.module('pencilblueApp', ['validation','password','email', 'parseDate','checklist-model']) 
+//['validation', 'uploadPhoto'] original dependency
+.controller('PencilBlueController', function($scope, $rootScope, $filter,$http, $window, validationService,passwordService,emailService) {
+  ^angular_objects^
+  ^tmp_angular=admin=elements=is_field_valid^
+  // console.log($scope.parentUser);
+  console.log($scope);
+
+  $scope.scheduler_execution_time = "06:00";
+  $scope.setSchedulerExecutionTimeToNow = function(flag) {
+	  $scope.scheduler_execution_time = $filter('date')(new Date(), 'HH:mm');	
+        	
+  };
+
+  $scope.confirmSchedulerExecutionTime = function() {
+  	var hour_min = $scope.scheduler_execution_time.split(":");
+  	if(hour_min.length != 2){
+  		alert("The time format is not correct. Correct time format is HH:MM");
+  		return;
+  	}
+  	var hour = parseInt(hour_min[0]);
+  	var min = parseInt(hour_min[1]);
+  	
+  	if(hour < 0 || hour > 24 || min < 0 || min > 59){
+  		alert("The time is out of range. Please check the time.");
+  		return;
+  	}
+    
+    var postURL = '/actions/user/manage_account/scheduler_execution_controller';
+    var postData = {};
+    postData.schedulerExecutionTime = $scope.scheduler_execution_time;
+    waitingDialog.show('Waiting for initializing scheduler. Please do not do any other operations until this modal disapears.');
+    $http.post(postURL, postData)
+    .success(function(result) {
+        console.log(result);
+        if(result.message == "Successful"){
+        	var cbInterval = setTimeout(cbTimer, 5000);
+	      	function cbTimer() {
+	          waitingDialog.hide();
+	      	}
+        }
+    	
+    })
+    .error(function(error, status) {
+      alert("Scheduler initialize error");
+      return;
+    });
+          
+  };
+
+  $('#scheduler_execution_time').timepicker ({'timeFormat': 'H:i','scrollDefault': 'now'});
+
+
+});
+
+
+</script>

@@ -1,0 +1,116 @@
+<style type="text/css">
+    body
+    {
+        background-color: #FFFFFF;
+        font-family: 'Helvetica', 'Arial', 'Verdana', sans-serif;
+    }
+
+    h1, h2, h3, h4, h5, h6
+    {
+        margin: 0;
+    }
+
+    a
+    {
+        text-decoration: none;
+    }
+
+    tr
+    {
+        border: none;
+    }
+
+    .pb_container
+    {
+        margin: 0 auto;
+        width: 36em;
+        max-width: 100%;
+    }
+
+    .pb_header
+    {
+        padding: .5em;
+        border: none
+    }
+
+    .pb_box
+    {
+        padding: .5em;
+        background-color: #EFEFEF;
+        border: 2px solid #EAEAEA;
+        border-radius: 0 0 .25em .25em;
+    }
+
+    .pb_lead
+    {
+        font-size: 1.125em;
+        margin: .5em 0;
+    }
+
+    .pb_fade
+    {
+        margin: 0;
+        color: #666666;
+        text-align: center;
+    }
+
+    .pb_button_holder
+    {
+        margin: 2em;
+        text-align: center;
+    }
+
+    .pb_button_primary
+    {
+        padding: .5em;
+        background-color: #05B0FA;
+        font-weight: bold;
+        color: #FFFFFF;
+        font-size: 1.25em;
+        text-align: center;
+        border-radius: .5em;
+    }
+
+    .pb_button_danger
+    {
+        padding: .5em;
+        background-color: #FA0505;
+        font-weight: bold;
+        color: #FFFFFF;
+        font-size: 1.25em;
+        text-align: center;
+        border-radius: .5em;
+    }
+
+    .pb_button:hover
+    {
+        background-color: #00AAD4;
+    }
+</style>
+
+<table class="pb_container">
+    <tr>
+        <td class="pb_box">
+            <h2>Hi ^parent_username^ ,</h2>
+            <p class="pb_lead">There is an inviation. <b>^sender_username^</b> wants to invite <b>^receiver_username^</b> as the friend. If you agree, please click the following button. If not, ignore this email.</p>
+                   
+            <a href="^accept_url^">
+                <p class="pb_button_holder">
+                    <span class="pb_button_primary">
+                        Accept Invitation
+                    </span>
+                </p>
+                
+            </a>
+            <a href="^reject_url^">
+                <p class="pb_button_holder">
+                    <span class="pb_button_danger">
+                        Reject Invitation
+                    </span>
+                </p>
+            </a>
+            
+        </td>
+    </tr>
+</table>
+

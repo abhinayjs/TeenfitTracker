@@ -1,0 +1,139 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript" src="/js/convertcsv/convertCSV.js"></script>
+<script type="text/javascript">
+angular.module('pencilblueApp', ['validation'])
+.controller('PencilBlueController', function($scope, $rootScope, $http, $window, validationService) {
+    ^angular_objects^
+    console.log($scope);
+
+    $scope.getDate = function(date,bias) {
+        var currDate = new Date(date);
+        currDate.setDate(currDate.getDate() + bias);
+        var td = currDate,
+          month = '' + (td.getMonth() + 1),
+          day = '' + td.getDate(),
+          year = td.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    };
+
+    $scope.report_date = $scope.getDate(new Date(),-1);
+
+    $scope.calWeeklyActivityData = function(userid, fitbit_data){
+        var weeklyActivityData = {};
+        var weeklyStepData = 0;
+        var weeklyHeartRateData = 0;
+        var weeklyNutritionCaloryData = 0;
+        var weeklySleepData = 0;
+        var flag = 0;
+        for(var i = 0; i < fitbit_data.length; i++){
+            if(fitbit_data[i].userId == userid){
+                weeklyStepData += Number(fitbit_data[i].fitbit_activityData['activities-steps'][0]['value']);
+                weeklyHeartRateData += Number(fitbit_data[i].fitbit_heartrateData['activities-heart'][0]['value'].heartRateZones[0].min);
+                weeklyNutritionCaloryData += Number(fitbit_data[i].fitbit_nutritionData['summary']['calories']);
+                weeklySleepData += Number(fitbit_data[i].fitbit_sleepData['summary'].totalMinutesAsleep);
+                flag = 1;
+            }
+        }
+        if(flag == 1){
+            // console.log(weeklyStepData);
+            weeklyStepData /= 7;
+            weeklyHeartRateData /= 7;
+            weeklyNutritionCaloryData /= 7;
+            weeklySleepData /= (7 * 60);
+
+            weeklyActivityData.weeklyStepData = weeklyStepData;
+            weeklyActivityData.weeklyHeartRateData = weeklyHeartRateData;
+            weeklyActivityData.weeklyNutritionCaloryData = weeklyNutritionCaloryData;
+            weeklyActivityData.weeklySleepData = weeklySleepData;
+        }else{
+            weeklyActivityData = null;
+        }
+
+        return weeklyActivityData;
+    }
+
+    $scope.dateRange = $scope.getDate(new Date(),-7) + " ~ " + $scope.getDate(new Date(),-1);
+
+    $scope.weeklyDataResult = [];
+
+    $scope.getWeeklyData = function(children, fitbit_data){
+
+        for(var i = 0, j = 0; i < children.length; i++, j++){
+            var weeklyDataItem = {};
+
+            weeklyDataItem.userId = children[i]._id;
+            weeklyDataItem.userName = children[i].username;
+            weeklyDataItem.email = children[i].email;
+
+            weeklyDataItem.weeklyActivityData = $scope.calWeeklyActivityData(children[i]._id, fitbit_data);
+            $scope.weeklyDataResult[j] = weeklyDataItem;
+
+        }
+    }
+
+    $scope.getWeeklyData($scope.children, $scope.fitbit_data);
+
+
+    $scope.setReportDate = function(flag){
+        // console.log($scope.report_date);
+        $http.get('/actions/user/activity_tracking/changeReportDate?user_id=' + $scope.user._id + '&report_date=' + $scope.report_date + '&flag=' + flag)
+        .success(function(result) {
+            if(flag == 0){
+                $scope.daily_reports = result;
+            }else{
+                $scope.dateRange = $scope.getDate($scope.report_date,-5) + " ~ " + $scope.getDate($scope.report_date,1);
+                $scope.fitbit_data = result;
+                $scope.getWeeklyData($scope.children, $scope.fitbit_data);
+            }
+           
+           
+        })
+        .error(function(error, status) {
+          alert("Set report date error");
+          return;
+        });
+    }
+
+    $("#downloadDailyReport").click(function (event) {
+            // var outputFile = 'export'
+        // var outputFile = window.prompt("What do you want to name your output file (Note: This won't have any effect on Safari)") || 'export';
+        // outputFile = outputFile.replace('.csv','') + '.csv'
+        var outputFile = "Daily Report_" + $scope.user.username + "_" + $scope.report_date + ".csv";
+        // CSV
+        exportTableToCSV.apply(this, [$('#dailyReport > table'), outputFile]);
+        
+        // IF CSV, don't do event.preventDefault() or return false
+        // We actually need this to be a typical hyperlink
+    });
+
+    $("#downloadWeeklyReport").click(function (event) {
+            // var outputFile = 'export'
+        // var outputFile = window.prompt("What do you want to name your output file (Note: This won't have any effect on Safari)") || 'export';
+        // outputFile = outputFile.replace('.csv','') + '.csv'
+        var outputFile = "Weekly Average Student Fitness Report_" + $scope.user.username + "_" + $scope.dateRange + ".csv";
+        // CSV
+        exportTableToCSV.apply(this, [$('#weeklyReport > table'), outputFile]);
+        
+        // IF CSV, don't do event.preventDefault() or return false
+        // We actually need this to be a typical hyperlink
+    });
+
+    $("#downloadDailyPlannerReport").click(function (event) {
+            // var outputFile = 'export'
+        // var outputFile = window.prompt("What do you want to name your output file (Note: This won't have any effect on Safari)") || 'export';
+        // outputFile = outputFile.replace('.csv','') + '.csv'
+        var outputFile = "Daily Student Planner Report_" + $scope.user.username + "_" + $scope.dateRange + ".csv";
+        // CSV
+        exportTableToCSV.apply(this, [$('#dailyPlannerReport > table'), outputFile]);
+        
+        // IF CSV, don't do event.preventDefault() or return false
+        // We actually need this to be a typical hyperlink
+    });
+
+});
+
+</script>

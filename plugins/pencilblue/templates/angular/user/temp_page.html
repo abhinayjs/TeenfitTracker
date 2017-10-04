@@ -1,0 +1,19 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript">
+angular.module('pencilblueApp', ['validation'])
+.controller('PencilBlueController', function($scope, $rootScope, $http, $window, validationService, $sce) {
+    ^angular_objects^
+
+    $scope.gotoManageFriend = function(){
+    	$window.location = '/user/manage_friend';
+    };
+    $scope.gotoActivityScore = function(){
+    	$window.location = '/user/activity_score';
+    };
+    $scope.gotoManageAccount = function(){
+    	$window.location = '/user/manage_account#/personal_info';
+    };
+    
+});
+
+</script>

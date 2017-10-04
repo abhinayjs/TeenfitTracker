@@ -1,0 +1,305 @@
+^tmp_user=headCalendar^
+    	<div class="calendar" id="eventCalendar" calendar="calendar" config="uiConfig.calendar" ui-calendar="uiConfig.calendar" ng-model="eventSources">
+    	</div>
+      <!-- <div ng-repeat="event in childrenEvents" ng-if="event">
+          <label ng-if="eventColor[event.user_id]">{{event.user_id}}<label>
+      </div>
+      <br> -->
+      <br>
+      <div ng-repeat="child in children" ng-if="child">
+           <label class="ng-style: {color:eventColor[child.child_id]}" ng-if="eventColor[child.child_id]"> Children Activity Color: {{child.child_username}}</label>
+      </div>
+      <div class="modal fade" id="createEventModal" tabindex="-1" role="dialog" 
+       aria-labelledby="myModalLabel" aria-hidden="true">
+       <div class="modal-dialog">
+          <div class="modal-content">
+             <div class="modal-header">
+                <button type="button" class="close" 
+                   data-dismiss="modal" aria-hidden="true">
+                      &times;
+                </button>
+                <h4 class="modal-title" id="createEventModalTitle">
+                   Create a new event
+                </h4>
+             </div>
+             <form name="newActivityForm" ng-submit="addNewActivity()" novalidate>
+                  <div class="modal-body">
+                      <div ng-if = "adminLevel == 0">
+  		                  <div class="form-group" ng-class="{'has-error': !isFieldValid(newActivityForm.childUsername)}">
+  		                      <label>Child Username</label>
+  		                          <select name="childUsername" ng-model="childUser.childUsername"  class="form-control" required>
+  		                            <option 
+  		                              ng-selected="{{child.child_username == childUser.childUsername}}"
+  		                              ng-repeat="child in children"
+  		                              value="{{child.child_username}}">
+  		                              {{child.child_username}} 
+  		                            </option>
+  		                        </select>
+  		                      <div class="form_error" ng-if="!isFieldValid(newActivityForm.childUsername)">^loc_REQUIRED_FIELD^</div>
+  		                  </div>
+		                  </div>
+                      <div class="form-group" ng-class="{'has-error': !isFieldValid(newActivityForm.activityName)}">
+                          <label>Event name</label>
+                          <select name="activityName" ng-model="activityName"  class="form-control" required>
+                            <option 
+                              ng-selected="{{eventContent.eventName == activityName}}"
+                              ng-repeat="eventContent in eventsList"
+                              value="{{eventContent.eventName}}">
+                              {{eventContent.eventName}} 
+                            </option>
+                        </select>
+                          <div class="form_error" ng-if="!isFieldValid(newActivityForm.activityName)">^loc_REQUIRED_FIELD^</div>
+                      </div>
+                      <div class="form-group">
+                          <label>Address</label>
+                          <input type="text" name="activityAddress" ng-model="activityAddress" class="form-control"></input>
+                      </div>
+                      <div class="form-group">
+                        <label>Description</label>
+                        <textarea type="textarea" rows="1" class="form-control" ng-model="activityDescription"></textarea>
+                      </div>
+                      <div class="form-group" ng-class="{'has-error': !isFieldValid(newActivityForm.activityStart_time)}">
+                        <label>Start Time</label>
+                        <div class="input-group">
+                            <input type="text" name="activityStart_time" id="activityStart_time" class="form-control" ng-model="activityStart_time" required></input>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" ng-click="setStartTimeToNow(0)">^loc_NOW^</button>
+                            </span>
+                        </div>
+                        <div class="form_error" ng-if="!isFieldValid(newActivityForm.activityStart_time)">^loc_REQUIRED_FIELD^</div>
+                      </div>
+                      <div class="form-group" ng-class="{'has-error': !isFieldValid(newActivityForm.activityEnd_time)}">
+                        <label>End Time</label>
+                        <div class="input-group">
+                            <input type="text" name="activityEnd_time" id="activityEnd_time" class="form-control" ng-model="activityEnd_time" required></input>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" ng-click="setEndTimeToNow(0)">^loc_NOW^</button>
+                            </span>
+                        </div>
+                        <div class="form_error" ng-if="!isFieldValid(newActivityForm.activityEnd_time)">^loc_REQUIRED_FIELD^</div>
+                      </div>
+                      <div class="form-group" >
+                          <label>Repeat</label>
+                          <label>
+                              <input type="checkbox" id = "repeatCheckBox" name="repeatCheckBox" ng-model = "repeatCheckBox" ng-click="isRepeated()">
+                          </label>
+                          <label>{{repeatSummary}}</label>
+                      </div>
+
+                   </div>
+                   <!-- end modal-->
+                   <div class="modal-footer">
+                      <button type="button" class="btn btn-default" 
+                         data-dismiss="modal">Cancel
+                      </button>
+                      <button type="submit" class="btn btn-primary">
+                         Submit
+                      </button>
+                   </div>
+               </form>
+          </div>
+    	</div>
+	</div>
+
+      <div class="modal fade" id="updateEventModal" tabindex="-1" role="dialog" 
+           aria-labelledby="myModalLabel" aria-hidden="true">
+           <div class="modal-dialog">
+              <div class="modal-content">
+                 <div class="modal-header">
+                    <button type="button" class="close" 
+                       data-dismiss="modal" aria-hidden="true">
+                          &times;
+                    </button>
+                    <h4 class="modal-title" id="updateEventModalTitle">
+                       Update the event
+                    </h4>
+                 </div>
+                 <form name="updateEventForm" ng-submit="updateEvent()" novalidate>
+                      <div class="modal-body">
+                          <div class="form-group" ng-if = "eventUsername != ''">
+                              <label>Child Username : </label>
+                              <label>{{eventUsername}} </label>
+                          </div>
+                          <label ng-if=" event_repeat_id != '' ">Repeat Delete</label>
+                          <label ng-if=" event_repeat_id != '' ">
+                              <input type="checkbox" id = "updateRepeated" ng-if=" event_repeat_id != '' " name="updateRepeated" ng-model = "updateRepeated" ng-click="updateRepeat()">
+                          </label>
+                          <div class="form-group" ng-class="{'has-error': !isFieldValid(updateEventForm.eventName)}">
+                              <label>Event name</label>
+                              <select name="eventName" ng-model="eventName"  class="form-control" required>
+                                <option 
+                                  ng-selected="{{eventContent.eventName == eventName}}"
+                                  ng-repeat="eventContent in eventsList"
+                                  value="{{eventContent.eventName}}">
+                                  {{eventContent.eventName}} 
+                                </option>
+                            </select>
+                              <div class="form_error" ng-if="!isFieldValid(updateEventForm.eventName)">^loc_REQUIRED_FIELD^</div>
+                          </div>
+                          <div class="form-group">
+                              <label>Address</label>
+                              <input type="text" name="eventAddress" ng-model="eventAddress" class="form-control"></input>
+                          </div>
+                          <div class="form-group">
+                            <label>Description</label>
+                            <textarea type="textarea" name="eventDescription" rows="3" class="form-control" ng-model="eventDescription"></textarea>
+                          </div>
+                          <div class="form-group" ng-class="{'has-error': !isFieldValid(updateEventForm.eventStart_time)}">
+                            <label>Start Time</label>
+                            <div class="input-group">
+                                <input type="text" name="eventStart_time" id="eventStart_time" class="form-control" ng-model="eventStart_time" required></input>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" ng-click="setStartTimeToNow(1)">^loc_NOW^</button>
+                                </span>
+                            </div>
+                            <div class="form_error" ng-if="!isFieldValid(updateEventForm.eventStart_time)">^loc_REQUIRED_FIELD^</div>
+                          </div>
+                          <div class="form-group" ng-class="{'has-error': !isFieldValid(updateEventForm.eventEnd_time)}">
+                            <label>End Time</label>
+                            <div class="input-group">
+                                <input type="text" name="eventEnd_time" id="eventEnd_time" class="form-control" ng-model="eventEnd_time" required></input>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" ng-click="setEndTimeToNow(1)">^loc_NOW^</button>
+                                </span>
+                            </div>
+                            <div class="form_error" ng-if="!isFieldValid(updateEventForm.eventEnd_time)">^loc_REQUIRED_FIELD^</div>
+                          </div>
+
+                       </div>
+                       <!-- end modal-->
+                       <div class="modal-footer">
+                          <button type="button" class="btn btn-default" 
+                             data-dismiss="modal">Cancel
+                          </button>
+                          <button type="button" class="btn btn-danger" ng-click = "deleteEvent()">
+                             Delete
+                          </button>
+                          <button type="submit" class="btn btn-primary">
+                             Update
+                          </button>
+                       </div>
+                   </form>
+              </div>
+          </div>
+      </div>
+
+
+      <div class="modal fade" id="repeatEventModal" tabindex="-1" role="dialog" 
+           aria-labelledby="myModalLabel" aria-hidden="true">
+           <div class="modal-dialog">
+              <div class="modal-content">
+                 <div class="modal-header">
+                    <button type="button" class="close" 
+                       data-dismiss="modal" aria-hidden="true">
+                          &times;
+                    </button>
+                    <h4 class="modal-title" id="repeatEventModalTitle">
+                       Repeating
+                    </h4>
+                 </div>
+                 <form name="repeatEventForm" id = "repeatEventForm" ng-submit="setRepeatEvents()" novalidate>
+                      <div class="modal-body">
+                          <div class="form-group">
+                              <label>Repeats</label>
+                              <select name="repeatName" ng-model="repeatName"  class="form-control" >
+                                <option 
+                                  ng-selected="{{repeatContent.repeatName == repeatName}}"
+                                  ng-repeat="repeatContent in repeatList"
+                                  value="{{repeatContent.repeatName}}">
+                                  {{repeatContent.repeatName}} 
+                                </option>
+                            </select>
+                          </div>
+                          <div class="form-group" >
+                              <label>Repeat Every</label>
+                              <select name="repeatFreName" ng-model="repeatFreName"  class="form-control" >
+                                <option 
+                                  ng-selected="{{repeatDayFreContent.repeatFreName == repeatFreName}}"
+                                  ng-repeat="repeatDayFreContent in repeatFreList"
+                                  value="{{repeatDayFreContent.repeatFreName}}">
+                                  {{repeatDayFreContent.repeatFreName}} 
+                                </option>
+                            </select>
+                          </div>
+                          <div class="form-group" ng-if = "repeatName == 'Weekly'">
+                              <label>Repeat On</label>
+                              <div class = "form-control">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="weekDay" ng-model="repeatUtil.weekDay.Sun">Sun
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="weekDay" ng-model="repeatUtil.weekDay.Mon">Mon
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="weekDay" ng-model="repeatUtil.weekDay.Tue">Tue
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="weekDay" ng-model="repeatUtil.weekDay.Wen">Wed
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="weekDay" ng-model="repeatUtil.weekDay.Thu">Thu
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="weekDay" ng-model="repeatUtil.weekDay.Fri">Fri
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="weekDay" ng-model="repeatUtil.weekDay.Sat">Sat
+                                </label>
+                              </div>
+                          </div>
+                          <div class="form-group" ng-if = "repeatName == 'Monthly'">
+                              <label>Repeat By</label>
+                              <div class = "form-control">
+                                <label class="radio-inline">
+                                    <input type="radio" name="monthDay" ng-model="repeatUtil.monthDay" value="dayOfMonth">day of the month&nbsp;
+                                </label>
+                                <label class="radio-inline" ng-if = "repeatUtil.monthDay == 'dayOfWeek'">
+                                    <input type="radio" name="monthDay" ng-model="repeatUtil.monthDay" value="dayOfWeek">day of the week&nbsp;
+                                </label>
+                                
+                              </div>
+                          </div>
+                          <div class="form-group">
+                            <label>Starts on</label>
+                            <input type="text" name="repeatStartDate" id="repeatStartDate" class="form-control" ng-model="repeatStartDate" disabled></input>
+                          </div>
+                          <div class="form-group" >
+                            <label>Ends </label>
+                            
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="repeatRadios" ng-model="repeatRadios.value" id="repeatRadios" value="0" ng-click="clearField(1)">After repeat&nbsp;
+                                    <input type="text" name="repeatTimes" ng-disabled ="repeatRadios.value != '0'" id="repeatTimes" ng-model="repeatTimes">&nbsp;occurrences
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="repeatRadios" ng-model="repeatRadios.value" id="repeatRadios" value="1" ng-click="clearField(0)">On:&nbsp;
+                                    <input type="text" name="repeatEndDate" ng-disabled ="repeatRadios.value != '1'" id="repeatEndDate" ng-model="repeatEndDate">
+                                </label>
+                            </div>
+
+                                
+                                
+                            
+                          </div>
+
+                       </div>
+                       <!-- end modal-body -->
+                       
+                       <div class="modal-footer">
+                          <button type="button" class="btn btn-default" 
+                             data-dismiss="modal" >Cancel
+                          </button>
+                          <button type="submit" class="btn btn-primary">
+                             Save
+                          </button>
+                       </div>
+                   </form>
+              </div>
+          </div>
+      </div>
+
+  ^tmp_angular=user=manage_calendar^
+
+^tmp_admin=footer^

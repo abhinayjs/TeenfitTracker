@@ -1,0 +1,35 @@
+^tmp_user=head^
+  <div class="col-md-9" style="padding: 0">
+    ^tmp_user=elements=topMenu^
+    ^tmp_admin=elements=error_success^
+    ^tmp_admin=elements=sub_nav^
+    ^tmp_admin=elements=tab_nav^
+    <!-- <form name="schedulerForm" ng-submit="saveScheduler()" novalidate>
+      <fieldset> -->
+        <div class="tab-content">
+          <div class="tab-pane active" id="scheduler_info">
+            <div class="form-group">
+              <label>Scheduler Execution Time</label>
+              <div class="input-group">
+                  <input type="text" name="scheduler_execution_time" id="scheduler_execution_time" class="form-control" ng-model="scheduler_execution_time"></input>
+                  <span class="input-group-btn">
+                      <button class="btn btn-default" type="button" ng-click="setSchedulerExecutionTimeToNow(0)">^loc_NOW^</button>
+                  </span>
+              </div>
+            </div>
+            <div class = "form-group">
+              <button type="button" class="btn btn-primary" ng-click="confirmSchedulerExecutionTime()">Confirm</button>
+            </div>
+
+          </div>
+            <!--end list-->
+        </div>
+        <!-- end tab-pane -->
+
+        
+      <!-- </fieldset>
+    </form> -->
+  </div>
+  ^tmp_angular=user=set_scheduler^
+
+^tmp_admin=footer^

@@ -1,0 +1,25 @@
+<div class="pull-right">
+	<div class="top_menu">
+    <div>
+    
+</div>
+	    <a ng-href="{{top_menu.href}}" data-toggle="tooltip" data-placement="left" title="{{top_menu.title}}" ng-repeat="top_menu in topMenu track by top_menu.name" ng-cloak>
+        <!-- <img src="{{top_menu.icon}}"/> -->
+	        <i class="fa fa-{{top_menu.icon}} fa-lg"></i><span ng-if="top_menu.title.length > 0">&nbsp;</span>
+	    </a>
+    </div>   
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.top_menu a[data-toggle="tooltip"]').tooltip(
+            {
+                'placement': 'left'
+            }
+        ).css(
+            {
+                'cursor': 'pointer'
+            }
+        );
+    });
+</script>

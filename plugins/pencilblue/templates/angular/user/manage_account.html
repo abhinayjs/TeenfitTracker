@@ -1,0 +1,500 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript" src="/js/angular/services/password.js"></script>
+<script type="text/javascript" src="/js/angular/services/email.js"></script>
+<script type="text/javascript" src="/js/angular/filters/parsable_date.js"></script>
+<script type="text/javascript" src="/js/checklist/checklist-model.js"></script>
+<script type="text/javascript" src="/js/waiting/waitingbar.js"></script>
+<script type="text/javascript">
+angular.module('pencilblueApp', ['validation','password','email', 'parseDate','uploadPhoto','checklist-model']) 
+//['validation', 'uploadPhoto'] original dependency
+.controller('PencilBlueController', function($scope, $rootScope, $filter,$http, $window, validationService,passwordService,emailService) {
+  ^angular_objects^
+  ^tmp_angular=admin=elements=is_field_valid^
+  // console.log($scope.parentUser);
+  console.log($scope);
+  $scope.usernameAvailable = null;
+  if($scope.user.username) {
+    $scope.originalUsername = $scope.user.username.toString();
+  }
+  $rootScope.photoValue = $scope.user.photo || null;
+
+  $scope.success_update_show = false;
+  $scope.error_update_show = false;
+  $scope.success_add_show = false;
+  $scope.error_add_show = false;
+
+  $http.get('/js/data/reminder.json')
+      .then(function(res){
+        
+        $scope.update_SUCCESS_Type = res.data.pencil_blue_account.update_success.type;
+        $scope.update_SUCCESS_Src = res.data.pencil_blue_account.update_success.link;
+
+        $scope.update_ERROR_Type = res.data.pencil_blue_account.update_error.type;
+        $scope.update_ERROR_Src = res.data.pencil_blue_account.update_error.link;
+
+        /*$scope.add_SUCCESS_Type = res.data.pencil_blue_account.add_success.type;
+        $scope.add_SUCCESS_Src = res.data.pencil_blue_account.add_success.link;
+
+        $scope.add_ERROR_Type = res.data.pencil_blue_account.add_error.type;
+        $scope.add_ERROR_Src = res.data.pencil_blue_account.add_error.link;*/
+  });
+  
+
+  $scope.canCheckUsername = function() {
+    if(!$scope.user.username || !$scope.user.username.length) {
+      return false;
+    }
+
+    if($scope.originalUsername && $scope.originalUsername.toLowerCase() === $scope.user.username.toLowerCase()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  $scope.getUsernameAvailability = function() {
+    $http.get('/api/user/get_username_available?username=' + $scope.user.username)
+    .success(function(result) {
+      $scope.usernameAvailable = result.data;
+    })
+    .error(function(error, status) {
+      $scope.errorMessage = error.message;
+    });
+  };
+
+
+  $scope.resetUsernameAvailability = function() {
+    $scope.usernameAvailable = null;
+  };
+
+  $scope.checkPasswordMatch = function() {
+    $scope.passwordMatch = passwordService.checkPasswordMatch($scope.user.password, $scope.user.confirm_password);
+  }
+
+  $scope.generatePassword = function() {
+    $scope.passwordGenerated = true;
+    $scope.user.password = passwordService.generatePassword();
+    $scope.user.confirm_password = $scope.user.password.toString();
+    $scope.checkPasswordMatch();
+  }
+
+  $scope.resetPasswordGenerated = function() {
+    $scope.passwordGenerated = false;
+  }
+
+  $scope.getPasswordInputType = function() {
+    return $scope.passwordGenerated ? 'text' : 'password';
+  }
+
+  $scope.setUserProfile = function(){
+    if($scope.user.middle_name){
+       $scope.user.middle_name = $scope.user.middle_name;
+    }
+    if($scope.user.age){
+      $scope.user.age = $scope.user.age;
+    }
+    var gender = document.getElementById("gender");
+    // alert(gender.value);
+    if(gender.value != ""){
+      $scope.user.gender = gender.value;
+    }
+    if($scope.user.dateOfBirth){
+      $scope.user.dateOfBirth = $scope.user.dateOfBirth;
+    }
+    if($scope.user.height){
+      $scope.user.height = $scope.user.height;
+    }
+    if($scope.user.weight){
+      $scope.user.weight = $scope.user.weight;
+    }
+    if($scope.user.hobbies){
+      $scope.user.hobbies = $scope.user.hobbies;
+    }
+    if($scope.user.emailContact){
+      $scope.user.emailContact = $scope.user.emailContact;
+    }
+    if($scope.user.preferNotification){
+      $scope.user.preferNotification = $scope.user.preferNotification;
+    }
+   
+  }
+  $scope.disableChid = function(){
+    var deleteUser = $window.confirm('Are you absolutely sure you want to disable this child?');
+
+    if (deleteUser) {
+      //$window.alert('Going to delete the user');
+
+      $http.get('/user/disable_child?userID=' + $scope.user._id)
+      .success(function(result) {
+        //$scope.childUsernameAvailable = result.data;
+        alert("Disable Child Success");
+        window.location.reload(false); 
+      })
+      .error(function(error, status) {
+        alert("Disable Child Error");
+        //$scope.errorMessage = error.message;
+      });
+    }
+  }
+
+  $scope.activeChild = function(){
+    var activeUser = $window.confirm('Are you absolutely sure you want to active this child?');
+
+    if (activeUser) {
+
+      $http.get('/user/active_child?userID=' + $scope.user._id)
+      .success(function(result) {
+        //$scope.childUsernameAvailable = result.data;
+        alert("Active Child Success");
+        window.location.reload(false); 
+      })
+      .error(function(error, status) {
+        alert("Active Child Error");
+        //$scope.errorMessage = error.message;
+      });
+    }
+  }
+
+
+  $scope.saveUser = function() {
+    $scope.formSubmitted = true;
+    $scope.successMessage = null;
+    $scope.errorMessage = null;
+
+    if(!validationService.isFormValid($scope.userForm)) {
+      return;
+    }
+    $scope.saving = true;
+    if($scope.photoValue) {
+      $scope.user.photo = $scope.photoValue;
+    }
+    var postURL = '/actions/user/manage_account/profile';
+
+    $scope.setUserProfile();
+    $http.post(postURL, $scope.user)
+    .success(function(result) {
+      //$scope.play_update_success();
+      $scope.successMessage = result.message;
+      $scope.saving = false;
+    })
+    .error(function(error, status) {
+      //$scope.play_update_error();
+      $scope.errorMessage = error.message;
+      $scope.saving = false;
+    });
+  };
+
+  //add child
+  $scope.childUsernameAvailable = null;//add here
+
+  $scope.child = {};
+
+  $scope.getChildUsernameAvailability = function(childname) {//add here
+    
+    $http.get('/api/user/get_username_available?username=' + childname)
+    .success(function(result) {
+      $scope.childUsernameAvailable = result.data;
+    })
+    .error(function(error, status) {
+      $scope.errorMessage = error.message;
+    });
+    
+  };
+
+
+  $scope.resetChildUsernameAvailability = function(){
+    $scope.childUsernameAvailable = null;
+  };
+
+
+  $scope.checkChildPasswordMatch = function() {
+    $scope.childPasswordMatch = passwordService.checkPasswordMatch($scope.child.password, $scope.child.confirm_password);
+  }
+
+  //add confirm email
+  $scope.checkChildEmailMatch = function() {
+    $scope.childEmailMatch = emailService.checkEmailMatch($scope.child.email, $scope.child.confirm_email);
+  };
+  //end confirm email
+
+  $scope.generateChildPassword = function() {
+    $scope.childPasswordGenerated = true;
+    $scope.child.password = passwordService.generatePassword();
+    $scope.child.confirm_password = $scope.child.password.toString();
+    $scope.checkChildPasswordMatch();
+  }
+
+  $scope.resetChildPasswordGenerated = function() {
+    $scope.childPasswordGenerated = false;
+  }
+
+  $scope.getChildPasswordInputType = function() {
+    return $scope.childPasswordGenerated ? 'text' : 'password';
+  }
+
+  $scope.member = {};
+  // alert($scope.user._id);
+  $scope.setMember = function(child_id,child_username){
+    if(child_id && child_username){
+      $scope.member.child_id = child_id;
+      $scope.member.child_username = child_username;
+    }else if(!child_id){
+      alert("Can not catch child id");
+      return;
+    }else if(!child_username){
+      alert("Can not catch child username");
+      return;
+    }
+    
+  }
+
+  $scope.addMemberToMember = function(){
+    var postURL = '/actions/user/manage_account/add_member_controller';
+    var postData = $scope.member;
+    $http.post(postURL, postData)
+    .success(function(result) {
+      
+    })
+    .error(function(error, status) {
+      alert("Add member error");
+      return;
+    });
+  };
+
+  $scope.addChildToUser = function() {
+    $scope.formSubmitted = true;
+     //$scope.play_add_success();
+    if(!validationService.isFormValid($scope.addChildForm)) {
+      return;
+    }   
+
+    var postURL = '/actions/user/manage_account/add_child_controller';
+    var postData = $scope.child;
+    $http.post(postURL, postData)
+    .success(function(result) {
+      $("#addChildModal").modal("hide");
+      $scope.setMember(result.data._id,result.data.username);
+      $scope.addMemberToMember();
+      $scope.member = {};
+      $scope.child = {};
+      $scope.formSubmitted = false;
+      //$scope.play_add_success();
+      window.location.reload(); 
+    })
+    .error(function(error, status) {
+      
+      $scope.child = {};
+      $scope.resetChildUsernameAvailability();
+      $scope.childPasswordMatch = null;
+      $scope.childEmailMatch = null;
+      $scope.addChildForm.email.$pristine = true;
+      $scope.addChildForm.confirm_email.$pristine = true;
+      $scope.addChildForm.email = null;
+      $scope.addChildForm.confirm_email = null;
+      $scope.addChildForm.username = null;
+      $scope.addChildForm.password = null;
+      $scope.addChildForm.confirm_password = null;
+
+      alert(error.message);
+
+      $scope.play_add_error();
+      return;
+
+    });
+  };
+
+  $scope.setDateOfBirthToNow = function() {
+      $scope.user.dateOfBirth = $filter('date')(new Date(), 'MM/dd/yyyy');
+  };
+
+  $('#dateOfBirth').datepicker();
+
+
+  $scope.play_add_success = function() {
+      var audio = document.getElementById("audio_add_success");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+           $scope.success_add_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.success_add_show = false;
+        $window.location.reload();
+      };
+  };
+   $scope.play_add_error = function() {
+      var audio = document.getElementById("audio_add_error");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+           $scope.error_add_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.error_add_show = false;
+        $window.location.reload();
+      };
+  };
+  $scope.play_update_success = function() {
+      var audio = document.getElementById("audio_update_success");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+         $scope.success_update_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.success_update_show = false;
+        $window.location.reload();
+      };
+  };
+
+  $scope.play_update_error = function() {
+      var audio = document.getElementById("audio_update_error");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+          $scope.error_update_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        //$scope.disableVideo = {'display': 'none'};
+        $scope.error_update_show = false;
+        $window.location.reload();
+        //$scope.show_element = false;
+      };
+  };
+
+  $scope.checkboxList = {
+    roles: []
+  }
+
+  console.log($scope.checkboxList);
+  $scope.getDate = function(date,bias) {
+    var currDate = new Date(date);
+    currDate.setDate(currDate.getDate() + bias);
+    var td = currDate,
+      month = '' + (td.getMonth() + 1),
+      day = '' + td.getDate(),
+      year = td.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  };
+  $scope.dateRange = {};
+  $scope.dateRange.start_date = $scope.getDate(new Date(),-1);
+  $scope.dateRange.end_date = $scope.getDate(new Date(),-1);
+  $scope.setDateToNow = function(flag) {
+      if(flag == 0){
+        $scope.dateRange.start_date = $scope.getDate(new Date(),0);
+      }else{
+        $scope.dateRange.end_date = $scope.getDate(new Date(),0);
+      }
+          
+  };
+  // $('#dateOfBirth').datepicker();
+  $scope.compareDates = function(date1, date2){
+      var d1 = new Date(date1);
+      var d2 = new Date(date2);
+      // console.log(d1.getTime());
+      // console.log(d2.getTime());
+      return d1.getTime() <= d2.getTime();
+  };
+
+  $scope.calDiffTwoDates = function(date1, date2){
+    var date1 = new Date(date1);
+    var date2 = new Date(date2);
+    var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; 
+    return diffDays;
+  }
+
+  $scope.confirmDataExtraction = function() {
+    if(!$scope.compareDates($scope.dateRange.start_date,$scope.dateRange.end_date)){
+        alert("Start Date should be smaller than End Date. Please check it.");
+        return;
+    }
+    // alert($scope.calDiffTwoDates($scope.dateRange.start_date,$scope.dateRange.end_date));
+    if($scope.calDiffTwoDates($scope.dateRange.start_date,$scope.dateRange.end_date) > 7){
+        alert("The date range should be no more than one week");
+        return;
+    }
+
+    if($scope.checkboxList.roles.length == 0){
+        alert("Please select at least one child.");
+        return;
+    }
+
+    var postURL = '/actions/user/manage_account/data_extraction_controller';
+    var postData = {};
+    postData.register_children = $scope.checkboxList.roles;
+    postData.dateRange = $scope.dateRange; 
+    waitingDialog.show('Waiting for data extraction. Please do not do any other operations until this modal disapears.');
+    $http.post(postURL, postData)
+    .success(function(result) {
+        // console.log(result);
+        if(result.message == 'Successful'){
+          waitingDialog.hide();
+        }
+    })
+    .error(function(error, status) {
+      alert("Data extraction error");
+      return;
+    });
+
+
+          
+  };
+
+  $scope.calculateIpal = function() {
+    // if(!$scope.compareDates($scope.start_date,new Date())){
+    //     alert("Date cannot be later than yesterday.");
+    //     return;
+    // }
+    
+
+    if($scope.checkboxList.roles.length == 0){
+        alert("Please select at least one child.");
+        return;
+    }
+
+    //var postURL = '/actions/user/manage_account/data_extraction_controller';
+    var postData = {};
+    postData.register_children = $scope.checkboxList.roles;
+    postData.dateRange = $scope.dateRange; 
+    //waitingDialog.show('Waiting for data extraction. Please do not do any other operations until this modal disapears.');
+        // $http.post(postURL, postData)
+        // .success(function(result) { 
+        //     // console.log(result);
+        //     if(result.message == 'Successful'){
+              var postURL = '/actions/user/ipal_calculation';
+    waitingDialog.show('Waiting for data extraction. Please do not do any other operations until this modal disapears.');
+              $http.post(postURL, postData)
+              .success(function(result) {
+                  if(result.message == 'IPAL Calculation Successful'){
+                      waitingDialog.hide();
+                  }
+                  $scope.successMessage = result.message;
+              })
+              .error(function(error, status) {
+                  alert("IPAL Calculation Error");
+                  return;
+              });
+            
+        // })
+        // .error(function(error, status) {
+        //     alert("Data extraction error");
+        //     return;
+        // });   
+  };
+
+  
+
+
+});
+
+
+</script>

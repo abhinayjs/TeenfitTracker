@@ -1,0 +1,235 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript">
+angular.module('pencilblueApp', ['validation','uploadPhoto']) 
+//['validation', 'uploadPhoto'] original dependency
+.controller('PencilBlueController', function($scope, $rootScope, $filter,$http, $window, validationService) {
+  ^angular_objects^
+  ^tmp_angular=admin=elements=is_field_valid^
+  // console.log($scope);
+  $scope.friendExist = null;
+  $scope.friendConfirmed = {};
+  
+  $scope.success_update_show = false;
+  $scope.error_update_show = false;
+  $scope.success_add_show = false;
+  $scope.error_add_show = false;
+  $http.get('/js/data/reminder.json')
+      .then(function(res){
+        
+        $scope.update_SUCCESS_Type = res.data.pencil_blue_friends.update_success.type;
+        $scope.update_SUCCESS_Src = res.data.pencil_blue_friends.update_success.link;
+
+        $scope.update_ERROR_Type = res.data.pencil_blue_friends.update_error.type;
+        $scope.update_ERROR_Src = res.data.pencil_blue_friends.update_error.link;
+
+        $scope.add_SUCCESS_Type = res.data.pencil_blue_friends.add_success.type;
+        $scope.add_SUCCESS_Src = res.data.pencil_blue_friends.add_success.link;
+
+        $scope.add_ERROR_Type = res.data.pencil_blue_friends.add_error.type;
+        $scope.add_ERROR_Src = res.data.pencil_blue_friends.add_error.link;
+  });
+
+  $scope.getFriendExist = function() {
+    $http.get('/actions/user/manage_friend/checkUserExist?username=' + $scope.friend.screenname)
+    .success(function(result) {
+       // console.log(result);
+       $scope.friendExist = result.data;
+    })
+    .error(function(error, status) {
+      alert("Found friend existence error");
+      return;
+    });
+  };
+  $scope.setFriendConfirmed = function(result){
+    if(result != null){
+      $scope.friendConfirmed.parentEmailId = result.data.parentEmailId;
+      $scope.friendConfirmed.receiver_id = result.data.receiver_id;
+      $scope.friendConfirmed.receiver_parent_id = result.data.receiver_parent_id;
+      $scope.friendConfirmed.sender_id = result.data.sender_id;
+      $scope.friendConfirmed.sender_username = result.data.sender_username;
+      $scope.friendConfirmed.receiver_username= result.data.receiver_username;
+      $scope.friendConfirmed.receiver_parent_username = result.data.receiver_parent_username;
+      $scope.friendConfirmed.receiver_email= result.data.receiver_email;
+      $scope.friendConfirmed.sender_email = result.data.sender_email;
+      $scope.friendConfirmed.receiver_age = result.data.age;
+    }else{
+      alert("Set confirmed friend information error");
+      return;
+    }
+    
+  }
+  $scope.addFriendToFriends = function(){
+    var postURL = '/actions/user/manage_friend/add_friend_controller';
+
+    var postData = $scope.friendConfirmed;
+    $http.post(postURL, postData)
+    .success(function(result) {
+      // console.log(result);
+      
+      if(result.data == true){
+
+        // alert("Invitation email has already sent. Please check it.");
+        // window.location.reload(); 
+        $("#inviteFriendModal").modal("hide");
+        // $scope.play_add_success();
+
+        alert("Invitation email has already sent. Please check it.");
+
+        window.location.reload(); 
+
+      }else{
+        alert(result.message);
+        return;
+      }
+        
+    })
+    .error(function(error, result) {
+      alert("Invite friend failure");
+      return;
+    });
+  }
+  $scope.checkFriendInvitationForm = function(){
+    $scope.formSubmitted = true;
+
+    if(!validationService.isFormValid($scope.inviteFriendForm)) {
+      return;
+    }   
+
+    var postURL = '/actions/user/manage_friend/check_friend_invitation_form_controller';
+    var postData = $scope.friend;
+    $http.post(postURL, postData)
+    .success(function(result) {
+      // console.log(result); 
+      if(result.data != false){
+         $scope.inviteFriendForm.parentEmailId.$pristine = true;
+         $scope.setFriendConfirmed(result);
+         $scope.addFriendToFriends();
+         $scope.friendConfirmed = {};
+         $scope.friend = {};
+         $scope.friendExist = null;
+         $scope.formSubmitted = false;
+         $scope.saving = false;
+         
+
+      }else{
+         alert(result.message);
+         $scope.friend = {};
+         $scope.friendExist = null;
+         $scope.friendConfirmed = {};
+         $scope.saving = false;
+         $scope.inviteFriendForm.parentEmailId.$pristine = true;
+         $scope.inviteFriendForm.parentEmailId = null;
+         $scope.inviteFriendForm.screenname = null;
+         // $scope.inviteFriendForm = null;
+      }
+    })
+    .error(function(error, status) {
+      alert("Check friend invitation form failure");
+      return;
+    });
+  }
+  $scope.saveFriendManagement = function() {
+    $scope.formSubmitted = true;
+    $scope.saving = true;
+    console.log($scope.friend.screenname);
+    if(!validationService.isFormValid($scope.friendManagementForm)) {
+      alert("Friend management form error");
+      return;
+    }
+
+    var postURL = '/actions/user/manage_friend/friend_management';
+
+    console.log($scope.friend);
+    $http.post(postURL, $scope.friend)
+    .success(function(result) {
+    })
+    .error(function(error, status) {
+
+    });
+  };
+   $scope.deleteFriend = function(friendid) {
+   var friend = {};
+   friend.friendID = friendid;
+ 
+  $scope.formSubmitted = true;
+  $scope.successMessage = null;
+  $scope.errorMessage = null;
+
+  var postURL = '/actions/user/manage_friend/deleteFriends';
+  $http.post(postURL, friend)
+  .success(function(result) {
+    $scope.successMessage = result.message;
+    $scope.play_update_success();
+    $scope.formSubmitted = false;
+    $scope.saving = false;
+  })
+  .error(function(error, status) {
+    $scope.errorMessage = error.message;
+    $scope.play_update_error();
+    $scope.formSubmitted = false;
+    $scope.saving = false;
+  });
+
+};
+
+  $scope.play_add_success = function() {
+      var audio = document.getElementById("audio_add_success");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+           $scope.success_add_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.success_add_show = false;
+        $window.location.reload();
+      };
+  };
+   $scope.play_add_error = function() {
+      var audio = document.getElementById("audio_add_error");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+           $scope.error_add_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.error_add_show = false;
+        $window.location.reload();
+      };
+  };
+  $scope.play_update_success = function() {
+      var audio = document.getElementById("audio_update_success");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+         $scope.success_update_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        $scope.success_update_show = false;
+        $window.location.reload();
+      };
+  };
+
+  $scope.play_update_error = function() {
+      var audio = document.getElementById("audio_update_error");
+      var type = audio.getAttribute("name");
+      if(type == 'video'){
+         //$scope.disableVideo = {'display': 'block'};
+          $scope.error_update_show = true;
+      }
+      audio.play();
+      audio.onended = function() {
+        //$scope.disableVideo = {'display': 'none'};
+        $scope.error_update_show = false;
+        $window.location.reload();
+        //$scope.show_element = false;
+      };
+  };
+
+
+});
+
+
+</script>

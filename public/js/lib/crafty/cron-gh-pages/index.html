@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Cron</title>
+      <!--  <script type="text/javascript" src="http://cdn.crafty-modules.com/crafty-DEBUG.js"></script> -->
+     <script type="text/javascript" src="assets/js/crafty.js"></script>
+        <script>var game_path = location.href.lastIndexOf("/") !== -1 ? location.href.substring(0, location.href.lastIndexOf("/") + 1) : location.href;</script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+       <script type="text/javascript" src="assets/js/loader.js"></script> 
+        <script type="text/javascript" src="assets/js/audio.js"></script> 
+      
+        <script type="text/javascript" src="assets/js/sprites.js"></script>
+       <script type="text/javascript" src="assets/js/sounds.js"></script> 
+       
+         <script type="text/javascript" src="assets/js/powerups.js"></script>
+        <script type="text/javascript" src="assets/js/weapons.js"></script>
+        <script type="text/javascript" src="assets/js/effects.js"></script>
+        <script type="text/javascript" src="assets/js/enemys.js"></script>
+        <script type="text/javascript" src="assets/js/player.js"></script>
+        
+        <script type="text/javascript" src="assets/js/levels.js"></script>
+        <script type="text/javascript" src="assets/js/game.js"></script>
+        <link type="text/css" href="assets/css/style.css" rel="stylesheet" /> 
+    </head>
+    <body>
+        <div class="info"><h1>Cron</h1>
+            <p>Small Canvas shooter based on <a href="http://craftyjs.com">Crafty</a></p>
+            <p>Use Arrow Keys to move, Space to shoot</p>
+        </div>
+        <div id="cr-stage">
+            <div id="interface">
+                <div class="panel transparent bottom"></div>
+                <div class="panel transparent"></div>
+                <div class="lives text left"></div>
+                <div class="level text center"></div>
+                <div class="score text right"></div>
+                <div class="bars bottom left" >
+                    <div id="hp" ><span class="text"></span></div>
+                </div>
+                <div class="bars bottom"  style="left:50%;margin-left:-89px">
+                    <div id="shield" ><span class="text"></span></div>
+                </div>
+                <div class="bars bottom right" >
+                    <div id="heat" ><span class="text"></span></div>
+                </div>
+                <div class="alert"></div>
+            </div>
+            <div id="loading">
+                 <div class="button" >Play Game</div>
+               
+                <div class="bars bottom">
+                    <div id="load" ><span class="text"></span></div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

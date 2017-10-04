@@ -1,0 +1,117 @@
+^tmp_user=head^
+<script type="text/javascript" src="/js/lib/crafty/crafty.js"></script>
+  <div class="col-md-9" style="padding: 0">
+    ^tmp_user=elements=topMenu^
+    ^tmp_admin=elements=error_success^
+    ^tmp_admin=elements=sub_nav^
+    ^tmp_admin=elements=tab_nav^
+    <div class="tab-content">
+      <!-- daily -->
+      <div class="tab-pane active" id="daily_score_report">
+          <div class="form-group" ng-if = "parentUser.admin == 0">
+            <label>Child Username</label>
+              <select name="childUsername" ng-model="children.username"  class="form-control" required>
+                <option 
+                  ng-selected="{{child.username == children.username}}"
+                  ng-repeat="child in children"
+                  value="{{child._id}}">
+                  {{child.username}} 
+                </option>
+              </select>
+          </div>
+          <pre>Date: <em>{{score_date | date:'fullDate' }}</em></pre>
+          <div class="input-group">
+            <input type="date" name="score_date" id="score_date" class="form-control" ng-model="score_date" ></input>
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" ng-click="setScoreDateAndChildUsername()">Confirm</button>
+            </span>
+          </div>
+          
+          </br>
+          <div>
+            <label class = "label-default">Tokens to Redeem: {{tokensRemaining}}</label>
+          </div>
+          <table class="table sortable table-striped table-bordered table-hover" >
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th title="Basal Energy Expenditure">BEE(kcal)</th>
+                    <th title="Total Energy Expenditure">TEE</th>
+                    <th title="Physical Activity Level">PAL</th>
+                    <th title="Physical Activity Coefficient">PA</th>
+                    <th>Activity Cofficient</th>
+                    <th>Daily IPAL</th>
+                    <th>Weekly Bonus</th>
+                    <th>Cumulative IPAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="odd gradeX" ng-repeat="daily_score in daily_scores">
+                    <td>{{daily_score.first_name}} {{daily_score.last_name}}</td>
+                    <td ng-if = "daily_score.pal.date == null">--</td><td ng-if= "daily_score.pal.date != null">{{daily_score.pal.date}}</td>
+                    <td ng-if = "daily_score.pal.BEE == null">--</td><td ng-if = "daily_score.pal.BEE != null">{{daily_score.pal.BEE}}</td>
+                    <td ng-if = "daily_score.pal.TEE == null">--</td><td ng-if = "daily_score.pal.TEE != null">{{daily_score.pal.TEE}}</td>
+                    <td ng-if = "daily_score.pal.PAL == null">--</td><td ng-if = "daily_score.pal.PAL != null">{{daily_score.pal.PAL}}</td>
+                    <td ng-if = "daily_score.pal.PA == null">--</td><td ng-if = "daily_score.pal.PA != null">{{daily_score.pal.PA}}</td>
+                    <td ng-if = "daily_score.pal.activity_coefficient == null">--</td><td ng-if = "daily_score.pal.activity_coefficient != null">{{daily_score.pal.activity_coefficient}}</td>
+                    <td ng-if = "daily_score.pal.ipal_daily == null">--</td><td ng-if = "daily_score.pal.ipal_daily != null">{{daily_score.pal.ipal_daily}}</td>
+                    <td ng-if = "daily_score.pal.weekly_bonus == null">--</td><td ng-if = "daily_score.pal.weekly_bonus != null">{{daily_score.pal.weekly_bonus}}</td>
+                    <td ng-if = "daily_score.pal.ipal_cumulative == null">--</td><td ng-if = "daily_score.pal.ipal_cumulative != null">{{daily_score.pal.ipal_cumulative}}</td>
+                    <!-- <td ng-if = "daily_score.pal.playGame">
+                      <button class="btn btn-default" type="button" ng-click="playSampleGame()">Play Game</button>
+                    </td> -->
+                </tr>
+            </tbody>
+          </table>
+          <div ng-if = "daily_scores[0].pal.playGame && parentUser.admin == 1">
+            <button class="btn btn-default" type="button" ng-click="showGames()">Play Game</button>
+            <button class="btn btn-default" type="button" ng-click="playGameLater()">Play Later</button>
+            <div ng-show = "showGame">
+              <a href="" ng-if = "gameNum == 1" ng-click = "play('Fruit_Assassin')">
+                <img src="/img/fruit_assassin_logo.png">
+                <span>Fruit Assassin</span>
+              </a>
+              <a href="" ng-if = "gameNum == 2" ng-click = "play('Defend_The_Den')">
+                <img src="/img/defendtheden_logo.png">
+                <span>Defend The Den</span>
+              </a>
+              <a href="" ng-if = "gameNum == 3" ng-click = "play('Cron')">
+                <img src="/img/cron_logo.png">
+                <span>Cron</span>
+              </a>
+              <a href="" ng-if = "gameNum == 4" ng-click = "play('Senet')">
+                <img src="/img/senet_logo.png">
+                <span>Senet</span>
+              </a>
+            </div>
+          </div>
+      </div>
+
+      <div class="tab-pane" id="play_game_later" ng-if = "parentUser.admin == 1">
+        <div ng-if = "playLaterSuccess || playLaterGames">
+          <a href="" ng-click = "play('Fruit_Assassin')">
+            <img src="/img/fruit_assassin_logo.png">
+            <span>Fruit Assassin</span>
+          </a>
+          <a href="" ng-click = play('Defend_The_Den') >
+            <img src="/img/defendtheden_logo.png">
+            <span>Defend The Den</span>
+          </a>
+          <a href="" ng-click = "play('Cron')" >
+            <img src="/img/cron_logo.png">
+            <span>Cron</span>
+          </a>
+          <a href="" ng-click = "play('Senet')" >
+            <img src="/img/senet_logo.png">
+            <span>Senet</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+    <!-- end tab content -->
+  </div>
+  ^tmp_angular=user=activity_score^ 
+^tmp_admin=footer^
+

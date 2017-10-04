@@ -1,0 +1,81 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript" src="/js/angular/services/password.js"></script>
+<script type="text/javascript" src="/js/angular/services/email.js"></script>
+<script type="text/javascript">
+var addChildModule = angular.module('AddChildModalApp', ['validation','password','email']);
+addChildModule.controller('AddChildController', function($scope, $rootScope, $http, $window, validationService,passwordService,emailService) {
+  ^angular_objects^
+  ^tmp_angular=admin=elements=is_field_valid^
+
+  $scope.childUsernameAvailable = null;//add here
+
+  $scope.child = {};
+
+  $scope.getChildUsernameAvailability = function(childname) {//add here
+    
+    $http.get('/api/user/get_username_available?username=' + childname)
+    .success(function(result) {
+      $scope.childUsernameAvailable = result.data;
+    })
+    .error(function(error, status) {
+      $scope.errorMessage = error.message;
+    });
+    
+  };
+
+
+  $scope.resetChildUsernameAvailability = function(){
+    $scope.childUsernameAvailable = null;
+  };
+
+
+  $scope.checkPasswordMatch = function() {
+    $scope.passwordMatch = passwordService.checkPasswordMatch($scope.child.password, $scope.child.confirm_password);
+  }
+
+  //add confirm email
+  $scope.checkEmailMatch = function() {
+    $scope.emailMatch = emailService.checkEmailMatch($scope.child.email, $scope.child.confirm_email);
+  };
+  //end confirm email
+
+  $scope.generatePassword = function() {
+    $scope.passwordGenerated = true;
+    $scope.child.password = passwordService.generatePassword();
+    $scope.child.confirm_password = $scope.child.password.toString();
+    $scope.checkPasswordMatch();
+  }
+
+  $scope.resetPasswordGenerated = function() {
+    $scope.passwordGenerated = false;
+  }
+
+  $scope.getPasswordInputType = function() {
+    return $scope.passwordGenerated ? 'text' : 'password';
+  }
+
+  $scope.addChild = function() {
+    $scope.formSubmitted = true;
+
+    if(!validationService.isFormValid($scope.addChildForm)) {
+      return;
+    }   
+
+    var postURL = '/actions/user/manage_account/add_child_controller';
+    var postData = $scope.child;
+    $http.post(postURL, postData)
+    .success(function(result) {
+      $scope.successMessage = result.message;
+      $scope.child = {};
+      $scope.formSubmitted = false;
+      $scope.reload();
+    })
+    .error(function(error, status) {
+      // $scope.formSubmitted = false;
+      alert(error.message);
+    });
+  };
+
+});
+angular.bootstrap(document.getElementById("addChildModal"),['AddChildModalApp']);
+</script>

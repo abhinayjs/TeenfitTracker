@@ -1,0 +1,37 @@
+{
+    "uid": "chartbeat-pencilblue",
+    "name": "Chartbeat Analytics Plugin",
+    "description": "Adds a Chartbeat tracking script to the site.",
+    "version": "0.2.0",
+    "pb_version": "0.4.x",
+    "author": {
+        "name": "PencilBlue",
+        "email": "info@pencilblue.org",
+        "website": "http://pencilblue.org",
+        "contributors": [
+            {
+                "name": "Blake Callens",
+                "email": ""
+            },
+            {
+                "name": "Brian Hyder",
+                "email": ""
+            }
+        ]
+    },
+    "settings": [
+        {
+            "name": "chartbeat_uid",
+            "value": ""
+        }
+    ],
+    "permissions": {
+        "ACCESS_USER": [],
+        "ACCESS_WRITER": [],
+        "ACCESS_EDITOR": [],
+        "ACCESS_MANAGING_EDITOR": []
+    },
+    "main_module": {
+        "path": "chartbeat.js"
+    }
+}

@@ -1,0 +1,35 @@
+<nav class="navbar navbar-default" role="navigation" style="margin-bottom: 0">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar_collapse_1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a id="navbar_brand_mobile" class="navbar-brand" href="/user/manage_account" style="padding: .4em">
+            <img src="^site_menu_logo^" style="max-height: 32px"></img>
+        </a>
+    </div>
+    <div class="pull-right">
+        <div class="top_menu">
+            <a ng-href="{{top_menu.href}}" data-toggle="tooltip" data-placement="left" title="{{top_menu.title}}" ng-repeat="top_menu in topMenu track by top_menu.name" ng-cloak>
+                <i class="fa fa-{{top_menu.icon}} fa-lg"></i><span ng-if="top_menu.title.length > 0">&nbsp;</span>
+            </a>
+        </div>   
+    </div>
+</nav>
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.top_menu a[data-toggle="tooltip"]').tooltip(
+            {
+                'placement': 'left'
+            }
+        ).css(
+            {
+                'cursor': 'pointer'
+            }
+        );
+    });
+</script>

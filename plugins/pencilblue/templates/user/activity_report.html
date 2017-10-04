@@ -1,0 +1,185 @@
+^tmp_user=head^
+  <div class="col-md-9" style="padding: 0">
+    ^tmp_user=elements=topMenu^
+
+    ^tmp_admin=elements=error_success^
+    ^tmp_admin=elements=sub_nav^
+    ^tmp_admin=elements=tab_nav^
+    <div class="tab-content">
+      <!-- daily -->
+      <div class="tab-pane active" id="daily_report">
+            <pre>Date: <em>{{report_date | date:'fullDate' }}</em></pre>
+            <div class="input-group">
+              <input type="date" name="report_date" id="report_date" class="form-control" ng-model="report_date" ></input>
+              <span class="input-group-btn">
+                  <button class="btn btn-default" type="button" ng-click="setReportDate(0)">Confirm</button>
+              </span>
+            </div>
+            </br>
+            <!-- <div class="form-group">
+              <p>
+                <button type="button" class="btn btn-primary" ng-click="downloadReport()">Download Report</button>
+              </p>
+            </div> -->
+            <div class='form-group'>
+                <a href="#" id ="downloadDailyReport" class='btn btn-primary' role='button'><!-- <img src="/img/icons/32/blue-25.png"/> -->Download Report
+                </a>
+            </div>
+            <div id = "dailyReport">
+              <table class="table table-striped table-bordered table-hover sortable" >
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Steps</th>
+                        <th>Steps Points</th>
+                        <th>Min in Heart Rate Zone</th>
+                        <th>Heart Rate Points</th>
+                        <th>Hours Sleep</th>
+                        <th>Sleep Points</th>
+                        <th>Nutrition Calories</th>
+                        <th>Cardio</th>
+                        <th>Core</th>
+                        <th>Flexibility</th>
+                        <th>Weights</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="odd gradeX" ng-repeat="daily_report in daily_reports">
+                        <td>{{daily_report.first_name}} {{daily_report.last_name}}</td>
+                        <td>{{daily_report.email}}</td>
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 &&  daily_report.Steps_finish == 0">{{daily_report.fitbit_data.fitbit_activityData['activities-steps'][0]['value']}}</td>
+                        <td ng-if="daily_report.fitbit_data != 1 &&  daily_report.Steps_finish == 1">{{daily_report.fitbit_data.fitbit_activityData['activities-steps'][0]['value']}}*</td>  
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.stepPoints}}</td> 
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.fitbit_data.fitbit_heartrateData['activities-heart'][0]['value'].heartRateZones[0].min}}</td> 
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.hearRatePoints}}</td> 
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.fitbit_data.fitbit_sleepData.summary.totalMinutesAsleep}}</td>
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.sleepPoints}}</td>
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">{{daily_report.fitbit_data.fitbit_nutritionData['summary']['calories']}}</td>
+
+
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">X</td>
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">X</td>
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">X</td>
+                        <td ng-if="daily_report.fitbit_data == 1 ">-</td><td ng-if="daily_report.fitbit_data != 1 ">X</td>
+                    </tr>
+                </tbody>
+
+              </table>
+            </div>
+      </div>
+      <!-- weekly -->
+      <div class="tab-pane" id="weekly_report">
+          <div class="input-group">
+            <input type="date" name="report_date" id="report_date" class="form-control" ng-model="report_date" ></input>
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" ng-click="setReportDate(1)">Confirm</button>
+            </span>
+            
+          </div>
+          </br>
+          <div class='form-group'>
+                <a href="#" id ="downloadWeeklyReport" class='btn btn-primary' role='button'><!-- <img src="/img/icons/32/blue-25.png"/> -->Download Report
+                </a>
+          </div>
+          <div class="form-control">
+            <label id = "dateRange" ng-model = "dateRange">Date: {{dateRange}}</label>
+          </div>
+          <div id = "weeklyReport">
+            <table class="table sortable table-striped table-bordered table-hover" >
+                    <thead>
+                        <tr>
+                            <th>Children Name</th>
+                            <th>Children Email</th>
+                            <th>7 Day Average #Steps</th>
+                            <th>7 Day Average Min in HR zone</th>
+                            <th>7 Day Average Nutrition calories</th>
+                            <th>7 Day Average Hours Sleep</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="odd gradeX" ng-repeat="weeklyData in weeklyDataResult">
+                            <td>{{weeklyData.userName}} </td>
+                            <td>{{weeklyData.email}}</td>
+                            <td ng-if = "weeklyData.weeklyActivityData == null">-</td><td ng-if = "weeklyData.weeklyActivityData != null">{{weeklyData.weeklyActivityData.weeklyStepData}}</td>
+                            <td ng-if = "weeklyData.weeklyActivityData == null">-</td><td ng-if = "weeklyData.weeklyActivityData != null">{{weeklyData.weeklyActivityData.weeklyHeartRateData}}</td>
+                            <td ng-if = "weeklyData.weeklyActivityData == null">-</td><td ng-if = "weeklyData.weeklyActivityData != null">{{weeklyData.weeklyActivityData.weeklyNutritionCaloryData}}</td>
+                            <td ng-if = "weeklyData.weeklyActivityData == null">-</td><td ng-if = "weeklyData.weeklyActivityData != null">{{weeklyData.weeklyActivityData.weeklySleepData}}</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+         <!-- weekly -->
+      <div class="tab-pane" id="daily_planner_report">
+          <pre>Date: <em>{{report_date | date:'fullDate' }}</em></pre>
+            <div class="input-group">
+              <input type="date" name="report_date" id="report_date" class="form-control" ng-model="report_date" ></input>
+              <span class="input-group-btn">
+                  <button class="btn btn-default" type="button" ng-click="setReportDate(0)">Confirm</button>
+              </span>
+            </div>
+          </br>
+          <div class='form-group'>
+              <a href="#" id ="downloadDailyPlannerReport" class='btn btn-primary' role='button'><!-- <img src="/img/icons/32/blue-25.png"/> -->Download Report
+              </a>
+          </div>
+          <div id = "dailyPlannerReport">
+            <table class="table sortable table-striped table-bordered table-hover" >
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Activity</th>
+                            <th>Activity Type</th>
+                            <th>Completed</th>
+                            <th>Minutes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="odd gradeX" ng-repeat="daily_report in daily_reports">
+                            <td>{{daily_report.first_name}} {{daily_report.last_name}} </td>
+                            <td>{{daily_report.email}}</td>
+                            <td>
+                            <table >
+                              <tr ng-repeat="activity in daily_report.pencilblueActivity">
+                                <td>{{activity.event_name}}</td>
+                              </tr>
+                            </table>
+                            </td>
+                            <td>
+                            <table >
+                              <tr ng-repeat="activity in daily_report.pencilblueActivity">
+                                <td>Core</td>
+                              </tr>
+                            </table>
+                            </td>
+                            <td>
+                            <table >
+                              <tr ng-repeat="activity in daily_report.pencilblueActivity">
+                                <td ng-if="activity.finished == 'true'">Yes</td>
+                                <td ng-if="activity.finished != 'true'">No</td>
+                              </tr>
+                            </table>
+                            </td>
+                            <td>
+                            <table >
+                              <tr ng-repeat="activity in daily_report.pencilblueActivity">
+                                <td>{{activity.durationTime}}</td>
+                              </tr>
+                            </table>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+              </div>
+        </div>
+
+    </div>
+    <!-- end tab content -->
+  </div>
+  ^tmp_angular=user=activity_report^ 
+^tmp_admin=footer^
+

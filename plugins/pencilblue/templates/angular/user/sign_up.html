@@ -1,0 +1,116 @@
+<script type="text/javascript" src="/js/angular/services/form_validation.js"></script>
+<script type="text/javascript" src="/js/angular/services/password.js"></script>
+<script type="text/javascript" src="/js/angular/services/email.js"></script><!-- add here-->
+<script type="text/javascript">
+angular.module('pencilblueApp', ['validation', 'password','email'])
+.controller('PencilBlueController', function($scope, $rootScope, $http, $window, validationService, passwordService,emailService) {
+  ^tmp_angular=admin=elements=is_field_valid^
+
+  $scope.usernameAvailable = null;
+  
+  $scope.isCheckboxChecked = function(){
+    return $scope.tsCheckBox;
+  }
+
+  $scope.getUsernameAvailability = function() {
+    
+    $http.get('/api/user/get_username_available?username=' + $scope.user.username)
+    .success(function(result) {
+      $scope.usernameAvailable = result.data;
+    })
+    .error(function(error, status) {
+      $scope.errorMessage = error.message;
+    });
+  };
+
+
+  $scope.resetUsernameAvailability = function() {
+    $scope.usernameAvailable = null;
+  };
+
+  $scope.checkPasswordMatch = function() {
+    $scope.passwordMatch = passwordService.checkPasswordMatch($scope.user.password, $scope.user.confirm_password);
+  };
+
+  //add confirm email
+  $scope.checkEmailMatch = function() {
+    $scope.emailMatch = emailService.checkEmailMatch($scope.user.email, $scope.user.confirm_email);
+  };
+  //end confirm email
+
+  $scope.generatePassword = function() {
+    $scope.passwordGenerated = true;
+    $scope.user.password = passwordService.generatePassword();
+    $scope.user.confirm_password = $scope.user.password.toString();
+    $scope.checkPasswordMatch();
+  }
+
+  $scope.resetPasswordGenerated = function() {
+    $scope.passwordGenerated = false;
+  }
+
+  $scope.getPasswordInputType = function() {
+    return $scope.passwordGenerated ? 'text' : 'password';
+  }
+
+  $scope.signUpUser = function() {
+    $scope.formSubmitted = true;
+    $scope.successMessage = null;
+    $scope.errorMessage = null;
+    
+    if(!validationService.isFormValid($scope.signUpForm)) {
+      return;
+    }
+
+    $scope.saving = true;
+    if($scope.photoValue) {
+      $scope.user.photo = $scope.photoValue;
+    }
+
+    var postURL = '/actions/user/sign_up';
+    var loginURL = '/actions/login';
+    var user_username = $scope.user.username;
+    var user_password = $scope.user.password;
+  
+
+    $http.post(postURL, $scope.user)
+    .success(function(result) {
+      $scope.successMessage = result.message;
+      // $scope.saving = false;
+      // $scope.user = {};
+      // $scope.formSubmitted = false;
+      // $scope.tsCheckBox = false;
+      // $scope.passwordMatch = false;
+      // $scope.emailMatch = false;
+      // $scope.signUpForm.email.$pristine = true;
+      // $scope.signUpForm.confirm_email.$pristine = true;
+      $scope.saving = false;
+      $scope.user = {};
+      $scope.formSubmitted = false;
+      $http({
+        method: 'POST',
+        url: loginURL,
+        data: $.param({username: user_username+"", password:user_password+""}),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+      });
+      alert("Registration Successfuly");
+      $window.location.href = '/';
+    })
+    .error(function(error, status) {
+      $scope.errorMessage = error.message;
+      $scope.user = {};
+      $scope.tsCheckBox = false;
+      $scope.formSubmitted = false;
+      $scope.saving = false;
+      $scope.passwordMatch = false;
+      $scope.emailMatch = false;
+      $scope.resetUsernameAvailability();
+      // $scope.signUpForm.email.$invalid = false;
+      $scope.signUpForm.email.$pristine = true;
+      // $scope.signUpForm.confirm_email.$invalid = false;
+      $scope.signUpForm.confirm_email.$pristine = true;
+      // $scope.signUpForm = null;
+    });
+  };
+});
+</script>
